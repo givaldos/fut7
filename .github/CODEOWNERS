@@ -1,0 +1,9 @@
+# Substitua/expanda quando o time de engenharia crescer.
+* @givaldos
+
+# Alterações de segurança, banco e entrega exigem atenção explícita.
+/supabase/ @givaldos
+/infra/ @givaldos
+/.github/ @givaldos
+/lib/security/ @givaldos
+/lib/auth/ @givaldos

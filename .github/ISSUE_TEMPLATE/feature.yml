@@ -1,0 +1,45 @@
+name: Funcionalidade
+description: Propor um incremento de produto com critérios verificáveis.
+title: "[Feature]: "
+labels: ["feature"]
+body:
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Resultado esperado
+      description: Qual problema do atleta ou gestor será resolvido?
+    validations:
+      required: true
+  - type: textarea
+    id: flow
+    attributes:
+      label: Fluxo mobile
+      description: Descreva o caminho principal e estados vazio, carregando, erro e sucesso.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Critérios de aceite
+      description: Use itens objetivos e testáveis.
+      placeholder: "- [ ] ..."
+    validations:
+      required: true
+  - type: textarea
+    id: security
+    attributes:
+      label: Segurança e privacidade
+      description: Papéis, fronteiras de time, PII, abuso, retenção e auditoria.
+    validations:
+      required: true
+  - type: dropdown
+    id: milestone
+    attributes:
+      label: Marco sugerido
+      options:
+        - MVP operacional
+        - WhatsApp-first
+        - Operação e confiança
+        - Depois do MVP
+    validations:
+      required: true

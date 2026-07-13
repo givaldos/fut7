@@ -1,0 +1,42 @@
+name: Bug
+description: Registrar um comportamento incorreto sem incluir dados pessoais.
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: Não inclua tokens, chaves, telefone, e-mail, nome real de atleta ou detalhes de vulnerabilidade. Use o canal privado descrito em SECURITY.md para segurança.
+  - type: textarea
+    id: observed
+    attributes:
+      label: Comportamento observado
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Comportamento esperado
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reprodução mínima
+    validations:
+      required: true
+  - type: dropdown
+    id: impact
+    attributes:
+      label: Impacto
+      options:
+        - Bloqueia o uso
+        - Fluxo principal degradado
+        - Fluxo secundário degradado
+        - Visual ou texto
+    validations:
+      required: true
+  - type: input
+    id: viewport
+    attributes:
+      label: Aparelho e largura aproximada
+      placeholder: "Ex.: Android, 360 px"

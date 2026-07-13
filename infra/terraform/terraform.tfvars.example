@@ -1,0 +1,14 @@
+supabase_organization_id  = "replace-with-supabase-org-slug"
+supabase_database_password = "replace-from-a-secret-manager"
+app_url                   = "https://app.example.com"
+turnstile_site_key        = "replace-with-turnstile-site-key"
+turnstile_secret_key      = "replace-from-a-secret-manager"
+
+# Set after all required workflows have run at least once.
+enable_github_ruleset = false
+
+# Keep zero only while there is a single maintainer.
+required_approvals = 0
+
+# Optional for a Vercel team. Leave null for a personal account.
+vercel_team = null
