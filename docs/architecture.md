@@ -53,6 +53,11 @@ Todas as tabelas de domínio carregam `team_id` ou dependem de uma chave compost
 - `/app`: roteador entre convites pendentes, criação de time e contexto existente;
 - `/app/new-team`: criação guiada do time;
 - `/app/{teamSlug}`: painel do time.
+- `/app/{teamSlug}/athletes`: BID, aprovação e disponibilidade do elenco;
+- `/app/{teamSlug}/athletes/new`: cadastro administrativo atômico;
+- `/app/{teamSlug}/events`: agenda e contagem da chamada;
+- `/app/{teamSlug}/events/new`: evento avulso ou série semanal;
+- `/app/{teamSlug}/events/{eventId}`: detalhe, presença administrativa e base confirmada da escala.
 
 ## Convites administrativos
 
@@ -67,9 +72,13 @@ A criação de times também é uma RPC estreita: exige e-mail confirmado, seria
 requisições concorrentes por usuário e aplica limites de frequência e propriedade.
 O papel `authenticated` não possui `INSERT` direto em `teams`.
 
+## Escritas operacionais
+
+As Server Actions validam formato e tamanho, mas a autorização e a atomicidade são impostas novamente no PostgreSQL. RPCs estreitas criam atleta + PII + preferências + chamadas futuras e evento/série + local + chamadas do elenco em uma única transação. O papel autenticado não possui `INSERT` direto nas tabelas centrais desses agregados.
+
 ## Recorrência
 
-Uma série não é a partida. Um processo idempotente deve materializar ocorrências futuras, por exemplo para os próximos 60 dias, preservando exceções feitas em uma ocorrência. A regra de recorrência deve ser armazenada em formato iCalendar RRULE e interpretada no fuso do time. Nunca recalcule o histórico.
+Uma série não é a partida. No MVP, a criação materializa de 2 a 52 ocorrências semanais e armazena a RRULE e o fuso do time na série. Cada ocorrência tem chamada própria e poderá receber escala e exceções independentes. O próximo incremento deve adicionar extensão idempotente da janela e edição/cancelamento sem recalcular o histórico.
 
 ## WhatsApp-first
 

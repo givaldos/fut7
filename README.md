@@ -13,12 +13,15 @@ Esta fundação já entrega:
 - painel autenticado e troca de time para administradores multi-time;
 - onboarding PLG com criação guiada do primeiro time, caixa de convites e ativação derivada do uso real;
 - convites administrativos vinculados ao e-mail verificado, com expiração, aceite explícito e compartilhamento por WhatsApp;
+- BID administrativo para cadastrar atletas com até três posições preferenciais, aprovar/rejeitar solicitações públicas e ativar/inativar o vínculo;
+- agenda avulsa ou semanal (até 52 ocorrências), com modalidade, adversário, local e chamada criada automaticamente para o elenco ativo;
+- detalhe do evento com contadores e registro administrativo de confirmação, recusa ou dúvida recebida pelo WhatsApp;
 - modelo PostgreSQL completo para atletas, posições, recorrências, eventos, presença, times do racha, escalações, consentimentos, fila de notificações e auditoria;
 - isolamento por time via Row Level Security (RLS), inclusive testes automatizados;
 - CI, análise de dependências e CodeQL com ações fixadas por SHA;
 - infraestrutura declarativa para Supabase, Vercel e regras do GitHub.
 
-As telas de operação do elenco, agenda, confirmação, divisão e escalação estão no roadmap; onboarding, convites e as regras de autorização já estão operacionais.
+Onboarding, convites, BID, agenda e chamada administrativa já estão operacionais. O vínculo da conta do atleta, sua confirmação autônoma, o editor tático e a divisão equilibrada permanecem no roadmap.
 
 ## Pré-requisitos
 

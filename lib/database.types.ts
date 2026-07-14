@@ -938,6 +938,37 @@ export type Database = {
       }
     }
     Functions: {
+      create_athlete_as_staff: {
+        Args: {
+          athlete_birth_date?: string
+          athlete_email?: string
+          athlete_full_name: string
+          athlete_phone_e164?: string
+          athlete_preferred_name?: string
+          athlete_public_profile?: boolean
+          athlete_shirt_number?: number
+          position_codes?: string[]
+          requested_team_id: string
+        }
+        Returns: string
+      }
+      create_event_as_staff: {
+        Args: {
+          attendance_deadline_minutes: number
+          event_duration_minutes: number
+          event_kind: Database["public"]["Enums"]["event_kind"]
+          event_opponent_name?: string
+          event_organization_mode: Database["public"]["Enums"]["organization_mode"]
+          event_sport_format: Database["public"]["Enums"]["sport_format"]
+          event_starts_at: string
+          event_title: string
+          event_venue_address?: string
+          event_venue_name?: string
+          repeat_weeks?: number
+          requested_team_id: string
+        }
+        Returns: string
+      }
       create_team_for_current_user: {
         Args: {
           sport_format: Database["public"]["Enums"]["sport_format"]
@@ -983,9 +1014,28 @@ export type Database = {
         Args: { invitation_response: string; requested_invitation_id: string }
         Returns: string
       }
+      review_athlete_registration: {
+        Args: { decision: string; requested_athlete_id: string }
+        Returns: Database["public"]["Enums"]["athlete_status"]
+      }
       revoke_team_invitation: {
         Args: { requested_invitation_id: string }
         Returns: boolean
+      }
+      set_athlete_availability: {
+        Args: {
+          next_status: Database["public"]["Enums"]["athlete_status"]
+          requested_athlete_id: string
+        }
+        Returns: Database["public"]["Enums"]["athlete_status"]
+      }
+      set_event_attendance_as_staff: {
+        Args: {
+          next_status: Database["public"]["Enums"]["attendance_status"]
+          requested_athlete_id: string
+          requested_event_id: string
+        }
+        Returns: Database["public"]["Enums"]["attendance_status"]
       }
       submit_athlete_registration: {
         Args: {

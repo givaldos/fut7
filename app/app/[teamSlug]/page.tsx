@@ -2,6 +2,7 @@ import { revokeTeamInvitation } from "@/app/app/team-actions";
 import { AdminInviteForm } from "@/components/admin-invite-form";
 import { LogoutButton } from "@/components/logout-button";
 import { TeamSwitcher } from "@/components/team-switcher";
+import { TeamBottomNav } from "@/components/team-bottom-nav";
 import { Button } from "@/components/ui/button";
 import { requireUser } from "@/lib/auth/dal";
 import { getAppUrl } from "@/lib/env/server";
@@ -14,7 +15,6 @@ import {
   Circle,
   ClipboardList,
   ExternalLink,
-  Home,
   MessageCircle,
   Plus,
   UserPlus,
@@ -134,13 +134,13 @@ export default async function TeamDashboardPage({
               O que vem agora
             </h1>
           </div>
-          <button
+          <Link
+            href={`/app/${currentTeam.slug}/events/new`}
             className="grid size-11 place-items-center rounded-full bg-emerald-700 text-white shadow-sm"
             aria-label="Criar novo evento"
-            type="button"
           >
             <Plus aria-hidden />
-          </button>
+          </Link>
         </section>
 
         <section className="grid gap-4 sm:grid-cols-2">
@@ -161,13 +161,19 @@ export default async function TeamDashboardPage({
                     timeZone: currentTeam.timezone,
                   }).format(new Date(nextEvent.starts_at))}
                 </p>
+                <Link href={`/app/${currentTeam.slug}/events/${nextEvent.id}`} className="mt-5 inline-flex min-h-10 items-center text-sm font-semibold text-emerald-200 hover:text-white">
+                  Abrir chamada
+                </Link>
               </>
             ) : (
               <>
                 <h2 className="mt-8 text-xl font-semibold">Agenda livre</h2>
                 <p className="mt-2 text-sm text-emerald-100">
-                  A criação do primeiro jogo será o próximo passo da ativação.
+                  Crie um jogo avulso ou programe as próximas semanas.
                 </p>
+                <Link href={`/app/${currentTeam.slug}/events/new`} className="mt-5 inline-flex min-h-10 items-center text-sm font-semibold text-emerald-200 hover:text-white">
+                  Criar primeiro evento
+                </Link>
               </>
             )}
           </article>
@@ -288,48 +294,27 @@ export default async function TeamDashboardPage({
           <h2 className="font-semibold">Atalhos</h2>
           <div className="mt-4 grid grid-cols-3 gap-3">
             {[
-              [UsersRound, "Atletas"],
-              [Check, "Presenças"],
-              [ClipboardList, "Escalar"],
-            ].map(([Icon, label]) => {
+              [UsersRound, "Atletas", `/app/${currentTeam.slug}/athletes`],
+              [Check, "Presenças", nextEvent ? `/app/${currentTeam.slug}/events/${nextEvent.id}` : `/app/${currentTeam.slug}/events`],
+              [ClipboardList, "Escalar", nextEvent ? `/app/${currentTeam.slug}/events/${nextEvent.id}#lineup` : `/app/${currentTeam.slug}/events`],
+            ].map(([Icon, label, href]) => {
               const ShortcutIcon = Icon as typeof UsersRound;
               return (
-                <button
+                <Link
                   key={label as string}
-                  type="button"
+                  href={href as string}
                   className="rounded-2xl bg-slate-50 px-2 py-4 text-center text-xs font-medium text-slate-700 hover:bg-emerald-50 hover:text-emerald-900"
                 >
                   <ShortcutIcon className="mx-auto mb-2 size-5" aria-hidden />
                   {label as string}
-                </button>
+                </Link>
               );
             })}
           </div>
         </section>
       </div>
 
-      <nav className="fixed inset-x-0 bottom-0 z-10 border-t border-slate-200 bg-white/95 px-4 pb-[max(.75rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur sm:hidden">
-        <div className="mx-auto grid max-w-md grid-cols-4">
-          {[
-            [Home, "Início"],
-            [UsersRound, "Atletas"],
-            [CalendarDays, "Agenda"],
-            [ClipboardList, "Escala"],
-          ].map(([Icon, label], index) => {
-            const NavIcon = Icon as typeof Home;
-            return (
-              <button
-                key={label as string}
-                type="button"
-                className={`flex flex-col items-center gap-1 py-1 text-[10px] ${index === 0 ? "font-semibold text-emerald-800" : "text-slate-500"}`}
-              >
-                <NavIcon className="size-5" aria-hidden />
-                {label as string}
-              </button>
-            );
-          })}
-        </div>
-      </nav>
+      <TeamBottomNav teamSlug={currentTeam.slug} active="home" nextEventId={nextEvent?.id} />
     </main>
   );
 }

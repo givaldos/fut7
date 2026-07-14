@@ -16,14 +16,14 @@ O baseline é OWASP ASVS 5.0 nível 2 e OWASP Top 10. Isso não é uma certifica
 
 | Risco | Controle |
 | --- | --- |
-| A01 Broken Access Control | RLS em todas as tabelas, chaves compostas anti-cross-tenant, DAL server-side, último owner protegido, convites limitados por papel e testes pgTAP por papel |
+| A01 Broken Access Control | RLS em todas as tabelas, chaves compostas anti-cross-tenant, DAL server-side, último owner protegido, convites limitados por papel, RPCs operacionais que revalidam staff e testes pgTAP por papel |
 | A02 Security Misconfiguration | headers seguros, CSP com nonce, HSTS em produção, `poweredByHeader` removido, schemas expostos mínimos, bucket privado |
 | A03 Supply Chain | lockfile, versões exatas, scripts de instalação allowlisted, Dependabot, dependency review, CodeQL, ações GitHub fixadas por SHA |
 | A04 Cryptographic Failures | TLS pelas plataformas, segredos fora do Git, tokens de convite aleatórios persistidos somente como SHA-256, variáveis sensíveis na Vercel, estado remoto do Terraform obrigatório |
 | A05 Injection | Zod, SQL parametrizado pelo SDK, RPC tipada, sem `eval`/`new Function`, regras ESLint |
 | A06 Insecure Design | PII separada, consentimento explícito, registro público pendente, outbox idempotente, deny-by-default |
 | A07 Authentication Failures | cookies geridos pelo Supabase SSR, claims verificados no servidor, senha local mínima de 12 caracteres, confirmação de e-mail, redirecionamento interno validado |
-| A08 Data Integrity Failures | migrations imutáveis, CI, branch protegida, constraints, aceite de convite transacional com row lock, auditoria e workflows fixados por SHA |
+| A08 Data Integrity Failures | migrations imutáveis, CI, branch protegida, constraints, aceite de convite transacional com row lock, cadastro de atleta/evento atômico, auditoria e workflows fixados por SHA |
 | A09 Logging and Alerting | audit log de mudanças sensíveis sem conteúdo integral da PII; runbook prevê alertas e resposta a incidente |
 | A10 Exceptional Conditions | erros públicos genéricos, timeouts, limites de tamanho, criação de times serializada e limitada por conta, falha fechada para anti-bot em produção, operações idempotentes |
 
@@ -32,6 +32,15 @@ O baseline é OWASP ASVS 5.0 nível 2 e OWASP Top 10. Isso não é uma certifica
 O formulário usa duas camadas de validação, campo honeypot, Turnstile validado no servidor, limite de tamanho e resposta genérica. A RPC privilegiada não pode ser executada pelos papéis `anon` ou `authenticated`; somente o servidor a chama com a chave secreta. Todo cadastro entra como `pending`, invisível no diretório público até aprovação e opt-in.
 
 O Turnstile não substitui rate limiting. Antes de abrir produção, configure limite por IP/slug no firewall da Vercel ou serviço equivalente, com política conservadora e observabilidade de falsos positivos.
+
+## Operações administrativas
+
+- criação de atleta, dados privados, posições e inclusão nas chamadas futuras ocorre em uma RPC transacional;
+- aprovação pública usa bloqueio de linha, só aceita estado `pending` e não pode ser repetida;
+- criação de evento materializa a série e popula a chamada do elenco no mesmo commit;
+- alteração administrativa de presença confere evento, atleta ativo e time novamente no banco;
+- `INSERT` direto em `athletes`, `athlete_private`, `venues`, `events` e `event_attendance` foi removido de `authenticated` para impedir agregados parciais;
+- mudanças de status de atleta, evento e presença continuam registradas em `audit_logs` sem copiar PII.
 
 ## LGPD e privacidade
 

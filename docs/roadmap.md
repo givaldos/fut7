@@ -25,19 +25,27 @@ Cada item abaixo foi escrito para virar issue do GitHub. O critério global de p
 
 ### M1.2 Gestão do BID
 
-Listar, pesquisar, cadastrar, editar, suspender e aprovar atletas pendentes. Dados privados só aparecem a staff; o elenco público mostra apenas opt-in. Incluir preferências ordenadas por campo/society/futsal.
+- [x] Listar elenco e solicitações pendentes com PII restrita a staff.
+- [x] Cadastrar atleta ativo com até três posições ordenadas da modalidade do time.
+- [x] Aprovar/rejeitar cadastro público e ativar/inativar atleta.
+- [ ] Pesquisar, editar cadastro e trocar preferências após a criação.
 
 ### M1.3 Agenda avulsa
 
-CRUD de jogo/amistoso/campeonato/treino com local, modalidade, adversário, limite de atletas e janela de confirmação.
+- [x] Criar e listar jogo/amistoso/campeonato/treino com local, modalidade, adversário e janela de confirmação.
+- [x] Abrir chamada automaticamente para o elenco ativo.
+- [ ] Editar, cancelar/concluir e configurar limite de atletas.
 
 ### M1.4 Agenda recorrente
 
-Editor semanal e materializador idempotente de ocorrências, com cancelamento/edição de uma ocorrência sem alterar histórico ou toda a série involuntariamente.
+- [x] Criar uma série semanal e materializar de 2 a 52 ocorrências com chamadas independentes.
+- [ ] Estender a janela de forma idempotente e editar/cancelar uma ocorrência ou série sem alterar o histórico.
 
 ### M1.5 Confirmação de presença
 
-Tela mobile de um toque para confirmar, recusar ou entrar em espera; respeitar abertura/fechamento e capacidade; mostrar contagem em tempo real com estado acessível.
+- [x] Chamada mobile administrativa com confirmação, recusa, dúvida e limpeza da resposta.
+- [x] Contadores por estado e base de confirmados para a escala.
+- [ ] Vínculo de conta e resposta de um toque pelo próprio atleta, respeitando capacidade e janela.
 
 ### M1.6 Escalação de jogo
 
