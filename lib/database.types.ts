@@ -731,6 +731,59 @@ export type Database = {
         }
         Relationships: []
       }
+      team_invitations: {
+        Row: {
+          accepted_at: string | null
+          accepted_by: string | null
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          invited_by: string
+          role: Database["public"]["Enums"]["team_role"]
+          status: Database["public"]["Enums"]["team_invitation_status"]
+          team_id: string
+          token_hash: string
+          updated_at: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          created_at?: string
+          email: string
+          expires_at: string
+          id?: string
+          invited_by: string
+          role: Database["public"]["Enums"]["team_role"]
+          status?: Database["public"]["Enums"]["team_invitation_status"]
+          team_id: string
+          token_hash: string
+          updated_at?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          invited_by?: string
+          role?: Database["public"]["Enums"]["team_role"]
+          status?: Database["public"]["Enums"]["team_invitation_status"]
+          team_id?: string
+          token_hash?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_invitations_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       team_memberships: {
         Row: {
           created_at: string
@@ -885,6 +938,55 @@ export type Database = {
       }
     }
     Functions: {
+      create_team_for_current_user: {
+        Args: {
+          sport_format: Database["public"]["Enums"]["sport_format"]
+          team_name: string
+          team_slug: string
+        }
+        Returns: string
+      }
+      create_team_invitation: {
+        Args: {
+          invited_email: string
+          invited_role: Database["public"]["Enums"]["team_role"]
+          requested_team_id: string
+        }
+        Returns: {
+          invitation_expires_at: string
+          invitation_id: string
+          invite_token: string
+        }[]
+      }
+      get_team_invitation_preview: {
+        Args: { raw_token: string }
+        Returns: {
+          invitation_expires_at: string
+          invited_role: Database["public"]["Enums"]["team_role"]
+          team_name: string
+          team_slug: string
+        }[]
+      }
+      list_my_team_invitations: {
+        Args: never
+        Returns: {
+          invitation_created_at: string
+          invitation_expires_at: string
+          invitation_id: string
+          invited_by_name: string
+          invited_role: Database["public"]["Enums"]["team_role"]
+          team_name: string
+          team_slug: string
+        }[]
+      }
+      respond_to_team_invitation: {
+        Args: { invitation_response: string; requested_invitation_id: string }
+        Returns: string
+      }
+      revoke_team_invitation: {
+        Args: { requested_invitation_id: string }
+        Returns: boolean
+      }
       submit_athlete_registration: {
         Args: {
           accepts_privacy_terms?: boolean
@@ -924,6 +1026,12 @@ export type Database = {
       organization_mode: "single_squad" | "split_teams"
       registration_source: "admin" | "public_form" | "import"
       sport_format: "field" | "society" | "futsal"
+      team_invitation_status:
+        | "pending"
+        | "accepted"
+        | "declined"
+        | "revoked"
+        | "expired"
       team_role: "owner" | "admin" | "manager"
     }
     CompositeTypes: {
@@ -1081,6 +1189,13 @@ export const Constants = {
       organization_mode: ["single_squad", "split_teams"],
       registration_source: ["admin", "public_form", "import"],
       sport_format: ["field", "society", "futsal"],
+      team_invitation_status: [
+        "pending",
+        "accepted",
+        "declined",
+        "revoked",
+        "expired",
+      ],
       team_role: ["owner", "admin", "manager"],
     },
   },

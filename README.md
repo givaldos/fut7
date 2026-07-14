@@ -11,12 +11,14 @@ Esta fundação já entrega:
 - página pública de cada time em `/t/{slug}`;
 - cadastro público de atleta com validação, consentimento, honeypot e Turnstile;
 - painel autenticado e troca de time para administradores multi-time;
+- onboarding PLG com criação guiada do primeiro time, caixa de convites e ativação derivada do uso real;
+- convites administrativos vinculados ao e-mail verificado, com expiração, aceite explícito e compartilhamento por WhatsApp;
 - modelo PostgreSQL completo para atletas, posições, recorrências, eventos, presença, times do racha, escalações, consentimentos, fila de notificações e auditoria;
 - isolamento por time via Row Level Security (RLS), inclusive testes automatizados;
 - CI, análise de dependências e CodeQL com ações fixadas por SHA;
 - infraestrutura declarativa para Supabase, Vercel e regras do GitHub.
 
-As telas de operação do elenco, agenda, confirmação, divisão e escalação estão no roadmap; o banco e as regras de autorização já foram preparados para elas.
+As telas de operação do elenco, agenda, confirmação, divisão e escalação estão no roadmap; onboarding, convites e as regras de autorização já estão operacionais.
 
 ## Pré-requisitos
 

@@ -16,7 +16,12 @@ Cada item abaixo foi escrito para virar issue do GitHub. O critério global de p
 
 ### M1.1 Onboarding e times
 
-Criar onboarding do primeiro time, edição de nome/slug/modalidade/fuso e convite de administradores. Incluir prevenção de takeover de slug e reautenticação para mudar owner.
+- [x] Roteador de ativação entre time existente, convite pendente e criação do primeiro time.
+- [x] Criação guiada com nome, slug protegido por unicidade e modalidade principal.
+- [x] Convite de administrador/organizador vinculado ao e-mail confirmado, com hash, TTL, uso único, recusa e revogação.
+- [x] Compartilhamento inicial de cadastro e convite pelo WhatsApp sem acoplamento à API do provedor.
+- [ ] Edição de nome, slug, modalidade e fuso com proteção contra takeover.
+- [ ] Transferência de owner com reautenticação e confirmação das duas partes.
 
 ### M1.2 Gestão do BID
 

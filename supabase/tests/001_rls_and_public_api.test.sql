@@ -198,11 +198,11 @@ select is(
         'athlete_private', 'athlete_position_preferences', 'venues',
         'event_series', 'events', 'event_attendance', 'event_squads',
         'lineup_spots', 'communication_consents', 'notification_outbox',
-        'audit_logs'
+        'audit_logs', 'team_invitations'
       )
       and c.relrowsecurity = true
   ),
-  16::bigint,
+  17::bigint,
   'all public domain tables have RLS enabled'
 );
 

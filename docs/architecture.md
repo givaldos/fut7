@@ -7,6 +7,7 @@ O Fut7 é um SaaS multi-time. A mesma pessoa pode administrar vários times, cad
 ## Contextos do produto
 
 1. **Identidade e acesso** — Supabase Auth identifica a pessoa; `team_memberships` define seu papel em cada time.
+   `team_invitations` representa o acesso pendente antes de existir uma associação ativa.
 2. **BID do time** — `athletes` guarda o registro esportivo; `athlete_private` isola telefone, e-mail, nascimento e observações; `athlete_position_preferences` ordena posições por modalidade.
 3. **Agenda** — `event_series` descreve uma recorrência e `events` materializa cada ocorrência. Jogos avulsos não precisam de série.
 4. **Presença** — `event_attendance` registra a resposta do atleta para uma ocorrência específica.
@@ -31,7 +32,7 @@ flowchart LR
   T --> B["Proteção do repositório"]
 ```
 
-O navegador usa apenas a chave publicável. Operações comuns são autorizadas no PostgreSQL por RLS. A chave secreta que ignora RLS existe somente no servidor e, nesta fundação, está limitada ao cadastro público previamente validado com Turnstile.
+O navegador usa apenas a chave publicável. Operações comuns são autorizadas no PostgreSQL por RLS. A chave secreta que ignora RLS existe somente no servidor e está limitada a RPCs estreitas: cadastro público previamente validado com Turnstile e prévia não sensível de um convite por token.
 
 ## Tenancy e papéis
 
@@ -47,9 +48,24 @@ Todas as tabelas de domínio carregam `team_id` ou dependem de uma chave compost
 - `/`: apresentação do produto;
 - `/t/{slug}`: perfil público e elenco com opt-in;
 - `/t/{slug}/cadastro`: solicitação pública, sempre criada como `pending`;
-- `/login`, `/sign-up`, `/forgot-password`, `/update-password`: identidade;
-- `/app`: seleção de contexto para administradores multi-time;
+- `/auth/login`, `/auth/sign-up`, `/auth/forgot-password`, `/auth/update-password`: identidade;
+- `/invite/{token}`: prévia pública mínima de convite; o aceite exige sessão e e-mail verificado;
+- `/app`: roteador entre convites pendentes, criação de time e contexto existente;
+- `/app/new-team`: criação guiada do time;
 - `/app/{teamSlug}`: painel do time.
+
+## Convites administrativos
+
+- o token aleatório tem 256 bits e apenas seu SHA-256 é persistido;
+- a prévia por token revela somente time, papel e validade; não concede acesso;
+- descoberta e aceite são vinculados ao e-mail confirmado em `auth.users`;
+- aceite/recusa usa bloqueio de linha e transação única para impedir replay e corrida;
+- owner pode convidar admin ou manager; admin pode convidar somente manager;
+- nenhuma associação ativa é criada antes da confirmação explícita do destinatário.
+
+A criação de times também é uma RPC estreita: exige e-mail confirmado, serializa
+requisições concorrentes por usuário e aplica limites de frequência e propriedade.
+O papel `authenticated` não possui `INSERT` direto em `teams`.
 
 ## Recorrência
 

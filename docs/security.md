@@ -16,16 +16,16 @@ O baseline é OWASP ASVS 5.0 nível 2 e OWASP Top 10. Isso não é uma certifica
 
 | Risco | Controle |
 | --- | --- |
-| A01 Broken Access Control | RLS em todas as tabelas, chaves compostas anti-cross-tenant, DAL server-side, último owner protegido, testes pgTAP por papel |
+| A01 Broken Access Control | RLS em todas as tabelas, chaves compostas anti-cross-tenant, DAL server-side, último owner protegido, convites limitados por papel e testes pgTAP por papel |
 | A02 Security Misconfiguration | headers seguros, CSP com nonce, HSTS em produção, `poweredByHeader` removido, schemas expostos mínimos, bucket privado |
 | A03 Supply Chain | lockfile, versões exatas, scripts de instalação allowlisted, Dependabot, dependency review, CodeQL, ações GitHub fixadas por SHA |
-| A04 Cryptographic Failures | TLS pelas plataformas, segredos fora do Git, variáveis sensíveis na Vercel, estado remoto do Terraform obrigatório |
+| A04 Cryptographic Failures | TLS pelas plataformas, segredos fora do Git, tokens de convite aleatórios persistidos somente como SHA-256, variáveis sensíveis na Vercel, estado remoto do Terraform obrigatório |
 | A05 Injection | Zod, SQL parametrizado pelo SDK, RPC tipada, sem `eval`/`new Function`, regras ESLint |
 | A06 Insecure Design | PII separada, consentimento explícito, registro público pendente, outbox idempotente, deny-by-default |
 | A07 Authentication Failures | cookies geridos pelo Supabase SSR, claims verificados no servidor, senha local mínima de 12 caracteres, confirmação de e-mail, redirecionamento interno validado |
-| A08 Data Integrity Failures | migrations imutáveis, CI, branch protegida, constraints, auditoria e workflows fixados por SHA |
+| A08 Data Integrity Failures | migrations imutáveis, CI, branch protegida, constraints, aceite de convite transacional com row lock, auditoria e workflows fixados por SHA |
 | A09 Logging and Alerting | audit log de mudanças sensíveis sem conteúdo integral da PII; runbook prevê alertas e resposta a incidente |
-| A10 Exceptional Conditions | erros públicos genéricos, timeouts, limites de tamanho, falha fechada para anti-bot em produção, operações idempotentes |
+| A10 Exceptional Conditions | erros públicos genéricos, timeouts, limites de tamanho, criação de times serializada e limitada por conta, falha fechada para anti-bot em produção, operações idempotentes |
 
 ## Cadastro público
 

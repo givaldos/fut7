@@ -32,13 +32,34 @@ resource "supabase_settings" "production" {
 
   auth = jsonencode({
     site_url                                          = var.app_url
-    uri_allow_list                                    = "${var.app_url}/auth/confirm,${var.app_url}/update-password"
+    uri_allow_list                                    = "${var.app_url}/auth/confirm,${var.app_url}/auth/update-password"
     disable_signup                                    = false
     jwt_exp                                           = 3600
     mailer_autoconfirm                                = false
     mailer_secure_email_change_enabled                = true
     mailer_otp_exp                                    = 600
     mailer_otp_length                                 = 6
+    mailer_subjects_confirmation                      = "Confirme seu e-mail — FUT7"
+    mailer_templates_confirmation_content             = <<-HTML
+      <!doctype html>
+      <html lang="pt-BR">
+        <body style="margin:0;background:#f4f4f5;color:#18181b;font-family:Arial,sans-serif">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="padding:32px 16px">
+            <tr><td align="center">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:520px;background:#fff;border-radius:16px;padding:32px">
+                <tr><td>
+                  <p style="margin:0 0 8px;color:#16a34a;font-size:14px;font-weight:700">FUT7</p>
+                  <h1 style="margin:0 0 16px;font-size:24px;line-height:1.25">Confirme seu e-mail</h1>
+                  <p style="margin:0 0 24px;color:#52525b;font-size:16px;line-height:1.5">Confirme este endereço para concluir a criação da sua conta de administrador.</p>
+                  <p style="margin:0 0 24px"><a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&amp;type=email&amp;next=/app" style="display:inline-block;border-radius:10px;background:#16a34a;color:#fff;padding:12px 20px;font-size:16px;font-weight:700;text-decoration:none">Confirmar e-mail</a></p>
+                  <p style="margin:0;color:#71717a;font-size:13px;line-height:1.5">Este link é pessoal e expira em poucos minutos. Se você não criou esta conta, ignore esta mensagem.</p>
+                </td></tr>
+              </table>
+            </td></tr>
+          </table>
+        </body>
+      </html>
+    HTML
     password_min_length                               = 12
     refresh_token_rotation_enabled                    = true
     security_captcha_enabled                          = false

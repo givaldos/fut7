@@ -244,10 +244,12 @@ otp_expiry = 600
 # admin_email = "admin@email.com"
 # sender_name = "Admin"
 
-# Uncomment to customize email template
-# [auth.email.template.invite]
-# subject = "You have been invited"
-# content_path = "./supabase/templates/invite.html"
+# The SSR confirmation endpoint exchanges TokenHash for a cookie-based session.
+# Using ConfirmationURL here would consume the token in GoTrue and then reach the
+# application callback without the token_hash it needs.
+[auth.email.template.confirmation]
+subject = "Confirme seu e-mail — FUT7"
+content_path = "./supabase/templates/confirmation.html"
 
 # Uncomment to customize notification email template
 # [auth.email.notification.password_changed]
