@@ -12,15 +12,18 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { getTurnstileToken, resetTurnstile, TurnstileWidget } from "@/components/turnstile-widget";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export function LoginForm({
   nextPath = "/app",
+  siteKey,
+  nonce,
   className,
   ...props
-}: React.ComponentPropsWithoutRef<"div"> & { nextPath?: string }) {
+}: React.ComponentPropsWithoutRef<"div"> & { nextPath?: string; siteKey?: string; nonce?: string }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -29,6 +32,7 @@ export function LoginForm({
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    const captchaToken = getTurnstileToken(e.currentTarget as HTMLFormElement);
     const supabase = createClient();
     setIsLoading(true);
     setError(null);
@@ -37,11 +41,13 @@ export function LoginForm({
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
+        options: { captchaToken },
       });
       if (error) throw error;
       router.replace(nextPath);
       router.refresh();
     } catch {
+      resetTurnstile();
       setError("E-mail ou senha inválidos.");
     } finally {
       setIsLoading(false);
@@ -52,7 +58,7 @@ export function LoginForm({
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl">Entre na sua conta</CardTitle>
+          <CardTitle className="text-xl">Administro um time</CardTitle>
           <CardDescription>
             Acesse os times que você administra.
           </CardDescription>
@@ -91,7 +97,8 @@ export function LoginForm({
                 />
               </div>
               {error && <p className="text-sm text-red-500">{error}</p>}
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              <TurnstileWidget siteKey={siteKey} nonce={nonce} action="admin_login" />
+              <Button type="submit" className="w-full" disabled={isLoading || (!siteKey && process.env.NODE_ENV === "production")}>
                 {isLoading ? "Entrando..." : "Entrar"}
               </Button>
             </div>

@@ -16,7 +16,7 @@ O baseline é OWASP ASVS 5.0 nível 2 e OWASP Top 10. Isso não é uma certifica
 
 | Risco | Controle |
 | --- | --- |
-| A01 Broken Access Control | RLS em todas as tabelas, chaves compostas anti-cross-tenant, DAL server-side, último owner protegido, convites limitados por papel, RPCs operacionais que revalidam staff e testes pgTAP por papel |
+| A01 Broken Access Control | RLS em todas as tabelas, chaves compostas anti-cross-tenant, DAL server-side, último owner protegido, convites limitados por papel, súmula mutável somente por staff, agregados públicos condicionados ao opt-in e testes pgTAP por papel |
 | A02 Security Misconfiguration | headers seguros, CSP com nonce, HSTS em produção, `poweredByHeader` removido, schemas expostos mínimos, bucket privado |
 | A03 Supply Chain | lockfile, versões exatas, scripts de instalação allowlisted, Dependabot, dependency review, CodeQL, ações GitHub fixadas por SHA |
 | A04 Cryptographic Failures | TLS pelas plataformas, segredos fora do Git, tokens de convite aleatórios persistidos somente como SHA-256, variáveis sensíveis na Vercel, estado remoto do Terraform obrigatório |
@@ -39,6 +39,8 @@ O Turnstile não substitui rate limiting. Antes de abrir produção, configure l
 - aprovação pública usa bloqueio de linha, só aceita estado `pending` e não pode ser repetida;
 - criação de evento materializa a série e popula a chamada do elenco no mesmo commit;
 - alteração administrativa de presença confere evento, atleta ativo e time novamente no banco;
+- lançamento da súmula exige staff, partida iniciada e atleta confirmado; correções ajustam o placar e são auditadas;
+- estatísticas ignoram rascunhos e são derivadas somente de eventos concluídos com súmula encerrada;
 - `INSERT` direto em `athletes`, `athlete_private`, `venues`, `events` e `event_attendance` foi removido de `authenticated` para impedir agregados parciais;
 - mudanças de status de atleta, evento e presença continuam registradas em `audit_logs` sem copiar PII.
 

@@ -12,6 +12,8 @@ import {
   CircleHelp,
   Clock3,
   MapPin,
+  NotebookTabs,
+  Pencil,
   ShieldCheck,
   UserRoundCheck,
   UsersRound,
@@ -42,7 +44,7 @@ export default async function EventDetailPage({
   searchParams,
 }: {
   params: Promise<{ teamSlug: string; eventId: string }>;
-  searchParams: Promise<{ created?: string }>;
+  searchParams: Promise<{ created?: string; updated?: string }>;
 }) {
   const user = await requireUser();
   const { teamSlug, eventId } = await params;
@@ -106,6 +108,8 @@ export default async function EventDetailPage({
   };
   const confirmed = call.filter((item) => item.response.status === "confirmed");
   const isScheduled = event.status === "scheduled";
+  const isEditable =
+    isScheduled && new Date(event.starts_at).valueOf() > new Date().valueOf();
 
   return (
     <main className="min-h-svh bg-slate-50 pb-24 text-slate-950">
@@ -117,9 +121,37 @@ export default async function EventDetailPage({
           </div>
         )}
 
-        <Link href={`/app/${team.slug}/events`} className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-slate-600 hover:text-emerald-800">
-          <ArrowLeft className="size-4" aria-hidden /> Voltar à agenda
-        </Link>
+        {(query.updated === "single_event" ||
+          query.updated === "this_and_future") && (
+          <div className="flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-medium text-emerald-950">
+            <BadgeCheck className="size-5 shrink-0" aria-hidden />
+            {query.updated === "this_and_future"
+              ? "Evento e próximas ocorrências atualizados. Exceções individuais foram preservadas."
+              : "Esta ocorrência foi atualizada sem alterar as demais."}
+          </div>
+        )}
+
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <Link href={`/app/${team.slug}/events`} className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-slate-600 hover:text-emerald-800">
+            <ArrowLeft className="size-4" aria-hidden /> Voltar à agenda
+          </Link>
+          <div className="flex items-center gap-2">
+            {isScheduled || event.status === "completed" ? (
+              <Button asChild className="h-11 rounded-xl bg-slate-950 px-3 hover:bg-slate-800">
+                <Link href={`/app/${team.slug}/events/${event.id}/match`}>
+                  <NotebookTabs aria-hidden /> Súmula
+                </Link>
+              </Button>
+            ) : null}
+            {isEditable && (
+              <Button asChild variant="outline" className="h-11 rounded-xl bg-white px-3">
+                <Link href={`/app/${team.slug}/events/${event.id}/edit`}>
+                  <Pencil aria-hidden /> Editar
+                </Link>
+              </Button>
+            )}
+          </div>
+        </div>
 
         <section className="rounded-3xl bg-emerald-950 p-6 text-white shadow-sm sm:p-8">
           <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-emerald-200">
@@ -215,4 +247,3 @@ export default async function EventDetailPage({
     </main>
   );
 }
-

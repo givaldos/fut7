@@ -24,6 +24,8 @@ export async function proxy(request: NextRequest) {
   // the Referer header when the user explicitly submits the confirmation form.
   if (
     request.nextUrl.pathname === "/auth/confirm" ||
+    request.nextUrl.pathname === "/auth/recovery" ||
+    request.nextUrl.pathname === "/auth/update-password" ||
     request.nextUrl.pathname.startsWith("/invite/")
   ) {
     response.headers.set("Referrer-Policy", "no-referrer");

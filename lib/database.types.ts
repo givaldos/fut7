@@ -462,10 +462,12 @@ export type Database = {
           created_by: string
           ends_at: string
           id: string
+          is_series_exception: boolean
           kind: Database["public"]["Enums"]["event_kind"]
           opponent_name: string | null
           organization_mode: Database["public"]["Enums"]["organization_mode"]
           series_id: string | null
+          series_position: number | null
           sport_format: Database["public"]["Enums"]["sport_format"]
           starts_at: string
           status: Database["public"]["Enums"]["event_status"]
@@ -480,10 +482,12 @@ export type Database = {
           created_by: string
           ends_at: string
           id?: string
+          is_series_exception?: boolean
           kind: Database["public"]["Enums"]["event_kind"]
           opponent_name?: string | null
           organization_mode?: Database["public"]["Enums"]["organization_mode"]
           series_id?: string | null
+          series_position?: number | null
           sport_format: Database["public"]["Enums"]["sport_format"]
           starts_at: string
           status?: Database["public"]["Enums"]["event_status"]
@@ -498,10 +502,12 @@ export type Database = {
           created_by?: string
           ends_at?: string
           id?: string
+          is_series_exception?: boolean
           kind?: Database["public"]["Enums"]["event_kind"]
           opponent_name?: string | null
           organization_mode?: Database["public"]["Enums"]["organization_mode"]
           series_id?: string | null
+          series_position?: number | null
           sport_format?: Database["public"]["Enums"]["sport_format"]
           starts_at?: string
           status?: Database["public"]["Enums"]["event_status"]
@@ -604,6 +610,129 @@ export type Database = {
           },
         ]
       }
+      match_incidents: {
+        Row: {
+          assist_athlete_id: string | null
+          athlete_id: string
+          created_at: string
+          created_by: string
+          event_id: string
+          id: string
+          kind: Database["public"]["Enums"]["match_incident_kind"]
+          minute: number | null
+          notes: string | null
+          scoring_side: number | null
+          team_id: string
+          updated_at: string
+        }
+        Insert: {
+          assist_athlete_id?: string | null
+          athlete_id: string
+          created_at?: string
+          created_by: string
+          event_id: string
+          id?: string
+          kind: Database["public"]["Enums"]["match_incident_kind"]
+          minute?: number | null
+          notes?: string | null
+          scoring_side?: number | null
+          team_id: string
+          updated_at?: string
+        }
+        Update: {
+          assist_athlete_id?: string | null
+          athlete_id?: string
+          created_at?: string
+          created_by?: string
+          event_id?: string
+          id?: string
+          kind?: Database["public"]["Enums"]["match_incident_kind"]
+          minute?: number | null
+          notes?: string | null
+          scoring_side?: number | null
+          team_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "match_incidents_assist_athlete_id_team_id_fkey"
+            columns: ["assist_athlete_id", "team_id"]
+            isOneToOne: false
+            referencedRelation: "athletes"
+            referencedColumns: ["id", "team_id"]
+          },
+          {
+            foreignKeyName: "match_incidents_athlete_id_team_id_fkey"
+            columns: ["athlete_id", "team_id"]
+            isOneToOne: false
+            referencedRelation: "athletes"
+            referencedColumns: ["id", "team_id"]
+          },
+          {
+            foreignKeyName: "match_incidents_event_id_team_id_fkey"
+            columns: ["event_id", "team_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id", "team_id"]
+          },
+        ]
+      }
+      match_reports: {
+        Row: {
+          created_at: string
+          created_by: string
+          event_id: string
+          finalized_at: string | null
+          finalized_by: string | null
+          id: string
+          notes: string | null
+          side_a_label: string
+          side_a_score: number
+          side_b_label: string
+          side_b_score: number
+          team_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          event_id: string
+          finalized_at?: string | null
+          finalized_by?: string | null
+          id?: string
+          notes?: string | null
+          side_a_label?: string
+          side_a_score?: number
+          side_b_label?: string
+          side_b_score?: number
+          team_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          event_id?: string
+          finalized_at?: string | null
+          finalized_by?: string | null
+          id?: string
+          notes?: string | null
+          side_a_label?: string
+          side_a_score?: number
+          side_b_label?: string
+          side_b_score?: number
+          team_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "match_reports_event_id_team_id_fkey"
+            columns: ["event_id", "team_id"]
+            isOneToOne: true
+            referencedRelation: "events"
+            referencedColumns: ["id", "team_id"]
+          },
+        ]
+      }
       notification_outbox: {
         Row: {
           athlete_id: string | null
@@ -685,6 +814,83 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      player_position_preferences: {
+        Row: {
+          created_at: string
+          position_code: string
+          priority: number
+          sport_format: Database["public"]["Enums"]["sport_format"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          position_code: string
+          priority: number
+          sport_format: Database["public"]["Enums"]["sport_format"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          position_code?: string
+          priority?: number
+          sport_format?: Database["public"]["Enums"]["sport_format"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "player_position_preferences_sport_format_position_code_fkey"
+            columns: ["sport_format", "position_code"]
+            isOneToOne: false
+            referencedRelation: "positions"
+            referencedColumns: ["sport_format", "code"]
+          },
+        ]
+      }
+      player_profiles: {
+        Row: {
+          bio: string | null
+          birth_date: string | null
+          created_at: string
+          display_name: string
+          handle: string
+          handle_changed_at: string | null
+          is_public: boolean
+          phone_verified_at: string
+          photo_path: string | null
+          preferred_name: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          bio?: string | null
+          birth_date?: string | null
+          created_at?: string
+          display_name: string
+          handle: string
+          handle_changed_at?: string | null
+          is_public?: boolean
+          phone_verified_at: string
+          photo_path?: string | null
+          preferred_name?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          bio?: string | null
+          birth_date?: string | null
+          created_at?: string
+          display_name?: string
+          handle?: string
+          handle_changed_at?: string | null
+          is_public?: boolean
+          phone_verified_at?: string
+          photo_path?: string | null
+          preferred_name?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       positions: {
         Row: {
@@ -909,6 +1115,17 @@ export type Database = {
         }
         Relationships: []
       }
+      public_player_directory: {
+        Row: {
+          bio: string | null
+          display_name: string | null
+          handle: string | null
+          photo_path: string | null
+          positions: Json | null
+          preferred_name: string | null
+        }
+        Relationships: []
+      }
       public_team_directory: {
         Row: {
           default_sport_format:
@@ -936,8 +1153,47 @@ export type Database = {
         }
         Relationships: []
       }
+      public_team_upcoming_events: {
+        Row: {
+          attendance_deadline: string | null
+          ends_at: string | null
+          event_id: string | null
+          kind: Database["public"]["Enums"]["event_kind"] | null
+          opponent_name: string | null
+          sport_format: Database["public"]["Enums"]["sport_format"] | null
+          starts_at: string | null
+          team_slug: string | null
+          team_timezone: string | null
+          title: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
+      add_match_incident_as_staff: {
+        Args: {
+          incident_assist_athlete_id?: string
+          incident_athlete_id: string
+          incident_kind: Database["public"]["Enums"]["match_incident_kind"]
+          incident_minute?: number
+          incident_notes?: string
+          incident_scoring_side?: number
+          requested_event_id: string
+        }
+        Returns: string
+      }
+      complete_verified_athlete_registration: {
+        Args: {
+          accepts_privacy_terms: boolean
+          accepts_whatsapp: boolean
+          birth_date: string
+          full_name: string
+          position_codes: string[]
+          preferred_name: string
+          team_slug: string
+        }
+        Returns: string
+      }
       create_athlete_as_staff: {
         Args: {
           athlete_birth_date?: string
@@ -969,6 +1225,24 @@ export type Database = {
         }
         Returns: string
       }
+      update_event_as_staff: {
+        Args: {
+          attendance_deadline_minutes: number
+          edit_scope: string
+          event_duration_minutes: number
+          event_kind: Database["public"]["Enums"]["event_kind"]
+          event_opponent_name?: string
+          event_organization_mode: Database["public"]["Enums"]["organization_mode"]
+          event_sport_format: Database["public"]["Enums"]["sport_format"]
+          event_starts_at: string
+          event_title: string
+          event_venue_address?: string
+          event_venue_name?: string
+          requested_event_id: string
+          requested_team_id: string
+        }
+        Returns: number
+      }
       create_team_for_current_user: {
         Args: {
           sport_format: Database["public"]["Enums"]["sport_format"]
@@ -989,6 +1263,30 @@ export type Database = {
           invite_token: string
         }[]
       }
+      delete_match_incident_as_staff: {
+        Args: { requested_incident_id: string }
+        Returns: boolean
+      }
+      get_my_player_statistics: {
+        Args: never
+        Returns: {
+          assists: number
+          goals: number
+          matches_played: number
+          red_cards: number
+          yellow_cards: number
+        }[]
+      }
+      get_public_player_statistics: {
+        Args: { requested_handle: string }
+        Returns: {
+          assists: number
+          goals: number
+          matches_played: number
+          red_cards: number
+          yellow_cards: number
+        }[]
+      }
       get_team_invitation_preview: {
         Args: { raw_token: string }
         Returns: {
@@ -996,6 +1294,19 @@ export type Database = {
           invited_role: Database["public"]["Enums"]["team_role"]
           team_name: string
           team_slug: string
+        }[]
+      }
+      list_my_player_team_links: {
+        Args: never
+        Returns: {
+          athlete_id: string
+          athlete_status: Database["public"]["Enums"]["athlete_status"]
+          registration_number: number
+          sport_format: Database["public"]["Enums"]["sport_format"]
+          team_id: string
+          team_name: string
+          team_slug: string
+          team_timezone: string
         }[]
       }
       list_my_team_invitations: {
@@ -1010,8 +1321,27 @@ export type Database = {
           team_slug: string
         }[]
       }
+      respond_to_event_as_player: {
+        Args: {
+          requested_event_id: string
+          response_status: Database["public"]["Enums"]["attendance_status"]
+        }
+        Returns: Database["public"]["Enums"]["attendance_status"]
+      }
       respond_to_team_invitation: {
         Args: { invitation_response: string; requested_invitation_id: string }
+        Returns: string
+      }
+      save_match_report_as_staff: {
+        Args: {
+          requested_event_id: string
+          requested_notes?: string
+          requested_side_a_label: string
+          requested_side_a_score: number
+          requested_side_b_label: string
+          requested_side_b_score: number
+          should_finalize?: boolean
+        }
         Returns: string
       }
       review_athlete_registration: {
@@ -1050,6 +1380,19 @@ export type Database = {
         }
         Returns: boolean
       }
+      update_my_player_profile: {
+        Args: {
+          field_positions: string[]
+          futsal_positions: string[]
+          requested_bio: string
+          requested_display_name: string
+          requested_handle: string
+          requested_is_public: boolean
+          requested_preferred_name: string
+          society_positions: string[]
+        }
+        Returns: string
+      }
     }
     Enums: {
       athlete_status: "pending" | "active" | "inactive" | "rejected"
@@ -1073,6 +1416,7 @@ export type Database = {
       membership_status: "invited" | "active" | "suspended"
       message_channel: "whatsapp" | "email" | "push"
       message_status: "pending" | "processing" | "sent" | "failed" | "cancelled"
+      match_incident_kind: "goal" | "yellow_card" | "red_card"
       organization_mode: "single_squad" | "split_teams"
       registration_source: "admin" | "public_form" | "import"
       sport_format: "field" | "society" | "futsal"
@@ -1236,6 +1580,7 @@ export const Constants = {
       membership_status: ["invited", "active", "suspended"],
       message_channel: ["whatsapp", "email", "push"],
       message_status: ["pending", "processing", "sent", "failed", "cancelled"],
+      match_incident_kind: ["goal", "yellow_card", "red_card"],
       organization_mode: ["single_squad", "split_teams"],
       registration_source: ["admin", "public_form", "import"],
       sport_format: ["field", "society", "futsal"],
@@ -1250,4 +1595,3 @@ export const Constants = {
     },
   },
 } as const
-

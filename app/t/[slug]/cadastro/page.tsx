@@ -1,6 +1,6 @@
 import { AthleteRegistrationForm } from "@/components/athlete-registration-form";
 import { getTurnstileConfig } from "@/lib/env/server";
-import { getPublicTeam } from "@/lib/data/public-team";
+import { getPublicPositions, getPublicTeam } from "@/lib/data/public-team";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { headers } from "next/headers";
@@ -17,7 +17,8 @@ export default async function AthleteRegistrationPage({
   }
 
   const team = await getPublicTeam(slug);
-  if (!team) notFound();
+  if (!team?.default_sport_format) notFound();
+  const positions = await getPublicPositions(team.default_sport_format);
   const nonce = (await headers()).get("x-nonce") ?? undefined;
   const turnstile = getTurnstileConfig();
 
@@ -44,6 +45,7 @@ export default async function AthleteRegistrationPage({
           <div className="my-6 h-px bg-slate-100" />
           <AthleteRegistrationForm
             teamSlug={slug}
+            positions={positions}
             siteKey={turnstile?.siteKey}
             nonce={nonce}
           />
@@ -52,4 +54,3 @@ export default async function AthleteRegistrationPage({
     </main>
   );
 }
-

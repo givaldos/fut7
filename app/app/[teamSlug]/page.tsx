@@ -21,7 +21,7 @@ import {
   UsersRound,
 } from "lucide-react";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 export default async function TeamDashboardPage({
   params,
@@ -80,6 +80,7 @@ export default async function TeamDashboardPage({
       .gt("expires_at", now)
       .order("created_at", { ascending: false }),
   ]);
+  if (!membership) redirect("/me");
 
   const canManageInvitations = membership?.role === "owner" || membership?.role === "admin";
   const publicTeamUrl = new URL(`/t/${currentTeam.slug}`, getAppUrl()).toString();

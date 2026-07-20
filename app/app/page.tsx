@@ -22,22 +22,44 @@ export default async function AppIndexPage({
 }: {
   searchParams: Promise<{ invite?: string }>;
 }) {
-  await requireUser();
+  const user = await requireUser();
   const supabase = await createClient();
-  const [{ data: teams, error: teamsError }, { data: invitations, error: invitationsError }] =
+  const [
+    { data: memberships, error: membershipsError },
+    { data: invitations, error: invitationsError },
+    { data: playerProfile, error: playerProfileError },
+  ] =
     await Promise.all([
-      supabase.from("teams").select("name, slug").order("name"),
+      supabase
+        .from("team_memberships")
+        .select("team_id")
+        .eq("user_id", user.id)
+        .eq("status", "active"),
       supabase.rpc("list_my_team_invitations"),
+      supabase.from("player_profiles").select("user_id").eq("user_id", user.id).maybeSingle(),
     ]);
 
-  if (teamsError || invitationsError) {
+  if (membershipsError || invitationsError || playerProfileError) {
     throw new Error("Não foi possível carregar seu acesso aos times.");
   }
+
+  const membershipTeamIds = (memberships ?? []).map((membership) => membership.team_id);
+  const { data: teams, error: teamsError } = membershipTeamIds.length
+    ? await supabase
+        .from("teams")
+        .select("name, slug")
+        .in("id", membershipTeamIds)
+        .order("name")
+    : { data: [], error: null };
+  if (teamsError) throw new Error("Não foi possível carregar seus times administrados.");
 
   const pendingInvitations = invitations ?? [];
   const firstTeam = teams?.[0];
   if (!pendingInvitations.length && firstTeam?.slug) {
     redirect(`/app/${firstTeam.slug}`);
+  }
+  if (!pendingInvitations.length && !firstTeam && playerProfile) {
+    redirect("/me");
   }
 
   const query = await searchParams;

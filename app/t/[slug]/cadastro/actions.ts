@@ -1,7 +1,7 @@
 "use server";
 
-import { getAppUrl, getTurnstileConfig } from "@/lib/env/server";
-import { createPrivilegedClient } from "@/lib/supabase/privileged";
+import { createClient } from "@/lib/supabase/server";
+import { normalizePhone } from "@/lib/validation/phone";
 import { z } from "zod";
 
 const slugSchema = z
@@ -17,170 +17,134 @@ const optionalText = (max: number) =>
     z.string().trim().min(2).max(max).optional(),
   );
 
+const birthDateSchema = z.preprocess(
+  (value) => (value === "" ? undefined : value),
+  z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .refine((value) => {
+      const date = new Date(`${value}T00:00:00Z`);
+      return (
+        !Number.isNaN(date.valueOf()) &&
+        date.toISOString().slice(0, 10) === value &&
+        value >= "1900-01-01" &&
+        date <= new Date()
+      );
+    })
+    .optional(),
+);
+
+const phoneSchema = z.string().transform((value, context) => {
+  const phone = normalizePhone(value);
+  if (!phone) {
+    context.addIssue({ code: "custom", message: "WhatsApp inválido." });
+    return z.NEVER;
+  }
+  return phone;
+});
+
 const registrationSchema = z.object({
   teamSlug: slugSchema,
-  fullName: z.string().trim().min(2).max(120),
+  fullName: z.string().trim().min(2).max(100),
   preferredName: optionalText(60),
-  birthDate: z.preprocess(
-    (value) => (value === "" ? undefined : value),
-    z
-      .string()
-      .regex(/^\d{4}-\d{2}-\d{2}$/)
-      .refine((value) => {
-        const date = new Date(`${value}T00:00:00Z`);
-        return (
-          !Number.isNaN(date.valueOf()) &&
-          date.toISOString().slice(0, 10) === value &&
-          value >= "1900-01-01" &&
-          date <= new Date()
-        );
-      })
-      .optional(),
-  ),
-  phone: z.preprocess(
-    (value) => (value === "" ? undefined : value),
-    z
-      .string()
-      .trim()
-      .transform((value) => value.replace(/[\s()-]/g, ""))
-      .pipe(z.string().regex(/^\+[1-9][0-9]{7,14}$/))
-      .optional(),
-  ),
-  email: z.preprocess(
-    (value) => (value === "" ? undefined : value),
-    z.string().trim().email().max(254).optional(),
-  ),
+  birthDate: birthDateSchema,
+  phone: phoneSchema,
   acceptsPrivacy: z.literal(true),
   acceptsWhatsapp: z.boolean(),
-  turnstileToken: z.string().max(2048).optional(),
+  positionCodes: z
+    .array(z.string().regex(/^[A-Z_]{1,16}$/))
+    .max(3)
+    .refine((items) => new Set(items).size === items.length),
   website: z.string().max(200),
+  turnstileToken: z.string().max(2048).optional(),
 });
 
-export type RegistrationState = {
-  status: "idle" | "success" | "error";
-  message: string;
-};
+export type RegistrationActionResult =
+  | { ok: true; phone: string }
+  | { ok: false; message: string };
 
-export const initialRegistrationState: RegistrationState = {
-  status: "idle",
-  message: "",
-};
-
-const turnstileResponseSchema = z.object({
-  success: z.boolean(),
-  hostname: z.string().optional(),
-  action: z.string().optional(),
-});
-
-async function validateTurnstile(token: string | undefined) {
-  const config = getTurnstileConfig();
-
-  if (!config) {
-    return process.env.NODE_ENV !== "production";
-  }
-
-  if (!token) {
-    return false;
-  }
-
-  try {
-    const response = await fetch(
-      "https://challenges.cloudflare.com/turnstile/v0/siteverify",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          secret: config.secretKey,
-          response: token,
-          idempotency_key: crypto.randomUUID(),
-        }),
-        cache: "no-store",
-        signal: AbortSignal.timeout(5000),
-      },
-    );
-    const result = turnstileResponseSchema.safeParse(await response.json());
-    const expectedHostname = getAppUrl().hostname;
-
-    return Boolean(
-      response.ok &&
-        result.success &&
-        result.data.success &&
-        result.data.action === "athlete_registration" &&
-        result.data.hostname === expectedHostname,
-    );
-  } catch {
-    return false;
-  }
-}
-
-export async function registerAthlete(
-  _previousState: RegistrationState,
-  formData: FormData,
-): Promise<RegistrationState> {
-  const parsed = registrationSchema.safeParse({
+function readRegistration(formData: FormData) {
+  return registrationSchema.safeParse({
     teamSlug: formData.get("teamSlug"),
     fullName: formData.get("fullName"),
     preferredName: formData.get("preferredName"),
     birthDate: formData.get("birthDate"),
     phone: formData.get("phone"),
-    email: formData.get("email"),
     acceptsPrivacy: formData.get("acceptsPrivacy") === "on",
     acceptsWhatsapp: formData.get("acceptsWhatsapp") === "on",
+    positionCodes: formData.getAll("positionCodes"),
+    website: formData.get("website")?.toString() ?? "",
     turnstileToken:
       formData.get("cf-turnstile-response")?.toString() || undefined,
-    website: formData.get("website")?.toString() ?? "",
+  });
+}
+
+export async function prepareAthleteRegistration(
+  formData: FormData,
+): Promise<RegistrationActionResult> {
+  const parsed = readRegistration(formData);
+
+  if (!parsed.success) {
+    return {
+      ok: false,
+      message:
+        parsed.error.issues.some((issue) => issue.path[0] === "phone")
+          ? "Informe um WhatsApp válido. O +55 é adicionado automaticamente."
+          : "Revise os campos obrigatórios e escolha no máximo 3 posições.",
+    };
+  }
+
+  // Honeypot: never proceed to an OTP request for automated submissions.
+  if (parsed.data.website) {
+    return { ok: false, message: "Não foi possível concluir agora." };
+  }
+
+  if (process.env.NODE_ENV === "production" && !parsed.data.turnstileToken) {
+    return {
+      ok: false,
+      message: "Conclua a verificação de segurança para continuar.",
+    };
+  }
+
+  return { ok: true, phone: parsed.data.phone };
+}
+
+export async function completeAthleteRegistration(
+  formData: FormData,
+): Promise<RegistrationActionResult> {
+  const parsed = readRegistration(formData);
+  if (!parsed.success || parsed.data.website) {
+    return { ok: false, message: "Revise os dados do cadastro." };
+  }
+
+  const supabase = await createClient();
+  const { data: claims, error: claimsError } = await supabase.auth.getClaims();
+  if (claimsError || !claims?.claims?.sub) {
+    return {
+      ok: false,
+      message: "Confirme o código recebido no WhatsApp antes de concluir.",
+    };
+  }
+
+  const { error } = await supabase.rpc("complete_verified_athlete_registration", {
+    team_slug: parsed.data.teamSlug,
+    full_name: parsed.data.fullName,
+    preferred_name: parsed.data.preferredName ?? "",
+    birth_date: parsed.data.birthDate ?? "",
+    accepts_privacy_terms: parsed.data.acceptsPrivacy,
+    accepts_whatsapp: parsed.data.acceptsWhatsapp,
+    position_codes: parsed.data.positionCodes,
   });
 
-  if (!parsed.success || (!parsed.data.phone && !parsed.data.email)) {
+  if (error) {
     return {
-      status: "error",
-      message: "Revise os dados. Informe pelo menos telefone ou e-mail.",
+      ok: false,
+      message:
+        error.code === "42501"
+          ? "O WhatsApp desta sessão ainda não foi confirmado. Solicite um novo código."
+          : "Não foi possível enviar o cadastro ao time. Tente novamente.",
     };
   }
 
-  // Honeypot: do not reveal detection behavior to automated submitters.
-  if (parsed.data.website) {
-    return {
-      status: "success",
-      message: "Cadastro enviado para análise do time.",
-    };
-  }
-
-  if (!(await validateTurnstile(parsed.data.turnstileToken))) {
-    return {
-      status: "error",
-      message: "Não foi possível validar a segurança. Tente novamente.",
-    };
-  }
-
-  try {
-    const supabase = createPrivilegedClient();
-    const { error } = await supabase.rpc("submit_athlete_registration", {
-      team_slug: parsed.data.teamSlug,
-      full_name: parsed.data.fullName,
-      preferred_name: parsed.data.preferredName ?? undefined,
-      birth_date: parsed.data.birthDate ?? undefined,
-      phone_e164: parsed.data.phone ?? undefined,
-      email: parsed.data.email ?? undefined,
-      accepts_privacy_terms: parsed.data.acceptsPrivacy,
-      accepts_whatsapp: parsed.data.acceptsWhatsapp,
-    });
-
-    if (error) {
-      return {
-        status: "error",
-        message: "Não foi possível enviar agora. Tente novamente mais tarde.",
-      };
-    }
-
-    return {
-      status: "success",
-      message: "Cadastro enviado. O administrador do time fará a confirmação.",
-    };
-  } catch {
-    return {
-      status: "error",
-      message: "O cadastro público ainda não está configurado neste ambiente.",
-    };
-  }
+  return { ok: true, phone: parsed.data.phone };
 }

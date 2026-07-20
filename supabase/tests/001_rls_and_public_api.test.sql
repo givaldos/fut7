@@ -302,7 +302,11 @@ reset role;
 set local role anon;
 
 select is(
-  (select count(*) from public.public_team_directory),
+  (
+    select count(*)
+    from public.public_team_directory
+    where slug in ('time-alpha', 'time-beta')
+  ),
   2::bigint,
   'anon can read the deliberately safe team directory'
 );

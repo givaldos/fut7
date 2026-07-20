@@ -7,6 +7,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { normalizePhone } from "@/lib/validation/phone";
 import { useActionState, useState } from "react";
 
 const initialState: CreateAthleteState = {};
@@ -22,6 +23,15 @@ export function AdminAthleteForm({
 }) {
   const [state, formAction, pending] = useActionState(createAthlete, initialState);
   const [selectedPositions, setSelectedPositions] = useState<string[]>([]);
+  const [fields, setFields] = useState({
+    fullName: "",
+    preferredName: "",
+    shirtNumber: "",
+    phone: "",
+    email: "",
+    birthDate: "",
+    publicProfile: false,
+  });
 
   const errorFor = (field: string) => state.errors?.[field]?.[0];
 
@@ -40,6 +50,8 @@ export function AdminAthleteForm({
           maxLength={120}
           autoComplete="name"
           required
+          value={fields.fullName}
+          onChange={(event) => setFields((current) => ({ ...current, fullName: event.target.value }))}
           aria-invalid={Boolean(errorFor("fullName"))}
         />
         {errorFor("fullName") && <p className="text-sm text-red-600">Informe o nome completo.</p>}
@@ -48,11 +60,11 @@ export function AdminAthleteForm({
       <div className="grid grid-cols-[1fr_6rem] gap-3">
         <div className="space-y-2">
           <Label htmlFor="preferred-name">Nome no time</Label>
-          <Input id="preferred-name" name="preferredName" className="h-12 bg-white" maxLength={60} />
+          <Input id="preferred-name" name="preferredName" className="h-12 bg-white" maxLength={60} value={fields.preferredName} onChange={(event) => setFields((current) => ({ ...current, preferredName: event.target.value }))} />
         </div>
         <div className="space-y-2">
           <Label htmlFor="shirt-number">Camisa</Label>
-          <Input id="shirt-number" name="shirtNumber" className="h-12 bg-white" type="number" min={1} max={99} inputMode="numeric" />
+          <Input id="shirt-number" name="shirtNumber" className="h-12 bg-white" type="number" min={1} max={99} inputMode="numeric" value={fields.shirtNumber} onChange={(event) => setFields((current) => ({ ...current, shirtNumber: event.target.value }))} />
         </div>
       </div>
 
@@ -94,22 +106,23 @@ export function AdminAthleteForm({
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="phone">WhatsApp</Label>
-          <Input id="phone" name="phone" className="h-12 bg-white" type="tel" inputMode="tel" placeholder="+55 11 99999-9999" autoComplete="tel" />
-          {errorFor("phone") && <p className="text-sm text-red-600">Use o número com DDI, como +55.</p>}
+          <Input id="phone" name="phone" className="h-12 bg-white" type="tel" inputMode="tel" placeholder="(11) 99999-9999" autoComplete="tel" value={fields.phone} onChange={(event) => setFields((current) => ({ ...current, phone: event.target.value }))} onBlur={() => { const normalized = normalizePhone(fields.phone); if (normalized) setFields((current) => ({ ...current, phone: normalized })); }} />
+          <p className="text-xs text-slate-500">O +55 é adicionado automaticamente.</p>
+          {errorFor("phone") && <p className="text-sm text-red-600">Informe um número de WhatsApp válido.</p>}
         </div>
         <div className="space-y-2">
           <Label htmlFor="email">E-mail</Label>
-          <Input id="email" name="email" className="h-12 bg-white" type="email" maxLength={254} autoComplete="email" />
+          <Input id="email" name="email" className="h-12 bg-white" type="email" maxLength={254} autoComplete="email" value={fields.email} onChange={(event) => setFields((current) => ({ ...current, email: event.target.value }))} />
         </div>
       </div>
 
       <div className="space-y-2">
         <Label htmlFor="birth-date">Data de nascimento</Label>
-        <Input id="birth-date" name="birthDate" className="h-12 bg-white" type="date" min="1900-01-01" max={new Date().toISOString().slice(0, 10)} />
+        <Input id="birth-date" name="birthDate" className="h-12 bg-white" type="date" min="1900-01-01" max={new Date().toISOString().slice(0, 10)} value={fields.birthDate} onChange={(event) => setFields((current) => ({ ...current, birthDate: event.target.value }))} />
       </div>
 
       <label className="flex items-start gap-3 rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-700">
-        <input type="checkbox" name="publicProfile" className="mt-0.5 size-4 accent-emerald-700" />
+        <input type="checkbox" name="publicProfile" checked={fields.publicProfile} onChange={(event) => setFields((current) => ({ ...current, publicProfile: event.target.checked }))} className="mt-0.5 size-4 accent-emerald-700" />
         <span>
           <strong className="block text-slate-900">Perfil público</strong>
           Permitir que nome esportivo, número e posições apareçam na página pública do time.
@@ -128,4 +141,3 @@ export function AdminAthleteForm({
     </form>
   );
 }
-

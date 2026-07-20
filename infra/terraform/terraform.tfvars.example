@@ -3,6 +3,16 @@ supabase_database_password = "replace-from-a-secret-manager"
 app_url                   = "https://app.example.com"
 turnstile_site_key        = "replace-with-turnstile-site-key"
 turnstile_secret_key      = "replace-from-a-secret-manager"
+smtp_host                 = "smtp.example.com"
+smtp_port                 = 587
+smtp_user                 = "replace-from-a-secret-manager"
+smtp_password             = "replace-from-a-secret-manager"
+smtp_admin_email          = "no-reply@auth.example.com"
+smtp_sender_name          = "FUT7"
+auth_email_rate_limit     = 30
+twilio_account_sid        = "replace-with-twilio-account-sid"
+twilio_auth_token         = "replace-from-a-secret-manager"
+twilio_message_service_sid = "replace-with-whatsapp-enabled-messaging-service-sid"
 
 # Set after all required workflows have run at least once.
 enable_github_ruleset = false

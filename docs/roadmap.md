@@ -45,7 +45,7 @@ Cada item abaixo foi escrito para virar issue do GitHub. O critério global de p
 
 - [x] Chamada mobile administrativa com confirmação, recusa, dúvida e limpeza da resposta.
 - [x] Contadores por estado e base de confirmados para a escala.
-- [ ] Vínculo de conta e resposta de um toque pelo próprio atleta, respeitando capacidade e janela.
+- [x] Identidade global, vínculo aprovado por time e resposta pelo próprio atleta dentro da janela.
 
 ### M1.6 Escalação de jogo
 
@@ -57,7 +57,19 @@ Gerar de 2 a N times equilibrados a partir dos confirmados, levando em conta gol
 
 ### M1.8 Convite e vínculo do atleta
 
-Permitir que o atleta reivindique/associe sua conta ao registro aprovado com token curto e uso único. Impedir enumeração de telefone/e-mail.
+- [x] Criar perfil por OTP no WhatsApp e associar ao BID pendente sem senha.
+- [x] Permitir um perfil em vários times com aprovação independente.
+- [x] Perfil pessoal público/privado com posições globais.
+- [ ] Fluxo assistido para reivindicar um BID administrativo antigo cujo telefone coincida, com trilha explícita para conflitos.
+
+### M1.9 Súmula e estatísticas básicas
+
+- [x] Placar, nomes dos times e observações gerais por ocorrência.
+- [x] Gols com assistência opcional e cartões amarelo/vermelho para atletas confirmados.
+- [x] Correção de lances com ajuste do placar e auditoria.
+- [x] Encerramento explícito antes de contabilizar estatísticas pessoais.
+- [x] Acompanhamento mobile pelo atleta e agregados em perfil privado/público consentido.
+- [ ] Métricas avançadas, filtros por time/temporada e importação de súmulas antigas.
 
 ## Marco 2 — WhatsApp-first
 
@@ -81,6 +93,7 @@ Validar assinatura, timestamp e replay; responder rápido; processar assíncrono
 
 - dashboard de métricas do time sem ranking vexatório;
 - histórico de presença e escalações;
+- análises históricas por time e temporada sem ranking vexatório;
 - exportação e exclusão LGPD;
 - logs e alertas operacionais;
 - backups/PITR e exercício de restauração;

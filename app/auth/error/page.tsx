@@ -21,6 +21,10 @@ export default function Page() {
               <Button asChild className="mt-5 w-full">
                 <Link href="/auth/login">Voltar ao login</Link>
               </Button>
+              <Button asChild variant="outline" className="mt-2 w-full">
+                <Link href="/auth/forgot-password">Solicitar recuperação de senha</Link>
+              </Button>
+              <Link href="/auth/resend-confirmation" className="mt-3 block min-h-11 py-3 text-center text-sm text-slate-600 underline underline-offset-4">Reenviar confirmação de e-mail</Link>
             </CardContent>
           </Card>
         </div>

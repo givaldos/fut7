@@ -1,4 +1,10 @@
-import { createAthleteSchema, createEventSchema } from "./operations";
+import {
+  createAthleteSchema,
+  createEventSchema,
+  matchIncidentSchema,
+  matchReportSchema,
+  updateEventSchema,
+} from "./operations";
 import { describe, expect, it } from "vitest";
 
 describe("operational validation", () => {
@@ -68,7 +74,78 @@ describe("operational validation", () => {
       deadlineMinutes: 120,
     };
 
-    expect(createEventSchema.safeParse({ ...base, startsAtIso: new Date(0).toISOString(), repeatWeeks: 1 }).success).toBe(false);
+    const pastEvent = createEventSchema.safeParse({
+      ...base,
+      startsAtIso: new Date(0).toISOString(),
+      repeatWeeks: 1,
+    });
+
+    expect(pastEvent.success).toBe(false);
+    if (!pastEvent.success) {
+      expect(pastEvent.error.flatten().fieldErrors.startsAtIso).toContain(
+        "A data e a hora do evento precisam estar no futuro.",
+      );
+    }
     expect(createEventSchema.safeParse({ ...base, startsAtIso: new Date(Date.now() + 86_400_000).toISOString(), repeatWeeks: 53 }).success).toBe(false);
+  });
+
+  it("accepts only the supported recurring event edit scopes", () => {
+    const base = {
+      teamId: "11111111-1111-4111-8111-111111111111",
+      teamSlug: "racha-do-bairro",
+      eventId: "22222222-2222-4222-8222-222222222222",
+      title: "Racha atualizado",
+      kind: "weekly_match",
+      organizationMode: "split_teams",
+      sportFormat: "society",
+      startsAtIso: new Date(Date.now() + 86_400_000).toISOString(),
+      durationMinutes: 90,
+      deadlineMinutes: 120,
+      editScope: "single_event",
+    };
+
+    expect(updateEventSchema.safeParse(base).success).toBe(true);
+    expect(
+      updateEventSchema.safeParse({ ...base, editScope: "entire_series" })
+        .success,
+    ).toBe(false);
+  });
+
+  it("validates match reports and optional goal assists", () => {
+    const identity = {
+      teamSlug: "racha-do-bairro",
+      eventId: "22222222-2222-4222-8222-222222222222",
+    };
+
+    expect(
+      matchReportSchema.safeParse({
+        ...identity,
+        sideALabel: "Verde",
+        sideBLabel: "Branco",
+        sideAScore: "3",
+        sideBScore: "2",
+        notes: "Jogo equilibrado.",
+        intent: "finalize",
+      }).success,
+    ).toBe(true);
+    expect(
+      matchIncidentSchema.safeParse({
+        ...identity,
+        kind: "goal",
+        athleteId: "33333333-3333-4333-8333-333333333333",
+        assistAthleteId: "",
+        scoringSide: "1",
+        minute: "18",
+        notes: "",
+      }).success,
+    ).toBe(true);
+    expect(
+      matchIncidentSchema.safeParse({
+        ...identity,
+        kind: "goal",
+        athleteId: "33333333-3333-4333-8333-333333333333",
+        scoringSide: "3",
+      }).success,
+    ).toBe(false);
   });
 });

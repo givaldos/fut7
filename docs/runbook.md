@@ -19,6 +19,8 @@ Não reutilize senha, chave secreta, Turnstile secret ou banco entre ambientes.
 5. Copie `.env.example` para `.env.local` e preencha com as credenciais locais exibidas por `npx supabase status`.
 6. Rode `npm run dev`.
 
+O OTP local não envia mensagem: use o WhatsApp de teste `+55 11 99999-9999` e o código `123456`. Outros números exigem um provedor configurado.
+
 O cadastro público real fica indisponível em produção se Turnstile ou a chave server-side estiverem ausentes. Em desenvolvimento, o restante da interface pode subir sem essas integrações.
 
 ## Provisionamento remoto
@@ -59,6 +61,18 @@ Crie um Environment protegido chamado `production` e adicione:
 - `VERCEL_API_TOKEN`: token de automação do projeto/time;
 - `INFRA_GITHUB_TOKEN`: fine-grained token para rulesets deste repositório;
 - `TURNSTILE_SITE_KEY` e `TURNSTILE_SECRET_KEY`.
+
+No workspace HCP Terraform, defina como variáveis sensíveis:
+
+- `TF_VAR_smtp_user`;
+- `TF_VAR_smtp_password`;
+- `TF_VAR_twilio_account_sid`;
+- `TF_VAR_twilio_auth_token`;
+- `TF_VAR_twilio_message_service_sid` apontando para um Messaging Service habilitado no WhatsApp.
+
+O `supabase_settings` habilita Phone Auth, exige confirmação e configura Twilio. Antes do primeiro deploy produtivo, valide o remetente e os templates no Twilio; WhatsApp no Supabase Auth é suportado apenas com Twilio ou Twilio Verify. Não copie essas credenciais para Vercel nem para `.env.local`.
+
+Configure também `smtp_host`, `smtp_port`, `smtp_admin_email` e `smtp_sender_name` no workspace. O domínio do remetente deve estar verificado no provedor transacional, com SPF, DKIM e DMARC publicados. Desative rastreamento de links nos e-mails de autenticação e teste cadastro, reenvio, recuperação e notificação de senha antes de liberar produção.
 
 Crie também as Repository Variables:
 

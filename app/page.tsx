@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { getSessionDestination } from "@/lib/auth/dal";
 import {
   ArrowRight,
   BellRing,
@@ -10,8 +11,12 @@ import {
   UsersRound,
 } from "lucide-react";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
-export default function Home() {
+export default async function Home() {
+  const sessionDestination = await getSessionDestination();
+  if (sessionDestination) redirect(sessionDestination);
+
   return (
     <main className="min-h-svh overflow-hidden bg-[#f7faf8] text-slate-950">
       <div className="relative bg-emerald-950 text-white">

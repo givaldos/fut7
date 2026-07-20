@@ -56,7 +56,7 @@ export default async function AthletesPage({
       .maybeSingle(),
     supabase
       .from("athletes")
-      .select("id, registration_number, full_name, preferred_name, shirt_number, status, registration_source, created_at")
+      .select("id, user_id, registration_number, full_name, preferred_name, shirt_number, status, registration_source, created_at")
       .eq("team_id", team.id)
       .order("created_at", { ascending: false }),
     supabase
@@ -138,7 +138,10 @@ export default async function AthletesPage({
                       <div className="min-w-0 flex-1">
                         <h3 className="truncate font-bold">{athlete.preferred_name || athlete.full_name}</h3>
                         {athlete.preferred_name && <p className="truncate text-xs text-slate-500">{athlete.full_name}</p>}
-                        <p className="mt-2 text-xs text-slate-500">Cadastro pela página pública</p>
+                        <p className="mt-2 flex items-center gap-1.5 text-xs text-slate-500">
+                          {athlete.user_id ? <BadgeCheck className="size-3.5 text-emerald-700" aria-hidden /> : null}
+                          {athlete.user_id ? "WhatsApp verificado" : "Cadastro público legado"}
+                        </p>
                       </div>
                     </div>
                     <div className="mt-4 space-y-1 text-sm text-slate-600">
@@ -220,4 +223,3 @@ export default async function AthletesPage({
     </main>
   );
 }
-

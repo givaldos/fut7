@@ -8,20 +8,24 @@ Esta fundação já entrega:
 
 - aplicação Next.js 16/Node.js 24 em português;
 - autenticação Supabase com sessão em cookies;
+- identidade global do atleta com login sem senha por OTP no WhatsApp;
+- perfil pessoal editável e público/privado em `/p/{handle}`, conectado a vários times;
 - página pública de cada time em `/t/{slug}`;
-- cadastro público de atleta com validação, consentimento, honeypot e Turnstile;
+- cadastro público com campos persistentes, posições, Turnstile e confirmação do WhatsApp antes do BID;
 - painel autenticado e troca de time para administradores multi-time;
 - onboarding PLG com criação guiada do primeiro time, caixa de convites e ativação derivada do uso real;
 - convites administrativos vinculados ao e-mail verificado, com expiração, aceite explícito e compartilhamento por WhatsApp;
 - BID administrativo para cadastrar atletas com até três posições preferenciais, aprovar/rejeitar solicitações públicas e ativar/inativar o vínculo;
 - agenda avulsa ou semanal (até 52 ocorrências), com modalidade, adversário, local e chamada criada automaticamente para o elenco ativo;
-- detalhe do evento com contadores e registro administrativo de confirmação, recusa ou dúvida recebida pelo WhatsApp;
+- confirmação de presença pelo próprio atleta e acompanhamento independente da aprovação em cada time;
+- súmula mobile por partida com placar, gols, assistências, cartões, observações e correções auditadas;
+- acompanhamento da partida pelo atleta, com atualização automática, e estatísticas em perfis pessoais e públicos consentidos;
 - modelo PostgreSQL completo para atletas, posições, recorrências, eventos, presença, times do racha, escalações, consentimentos, fila de notificações e auditoria;
 - isolamento por time via Row Level Security (RLS), inclusive testes automatizados;
 - CI, análise de dependências e CodeQL com ações fixadas por SHA;
 - infraestrutura declarativa para Supabase, Vercel e regras do GitHub.
 
-Onboarding, convites, BID, agenda e chamada administrativa já estão operacionais. O vínculo da conta do atleta, sua confirmação autônoma, o editor tático e a divisão equilibrada permanecem no roadmap.
+Onboarding, convites, identidade do atleta, BID, agenda, chamada e estatísticas básicas por partida já estão operacionais. O editor tático, a divisão equilibrada e análises históricas avançadas permanecem no roadmap.
 
 ## Pré-requisitos
 
@@ -42,6 +46,8 @@ npm run dev
 ```
 
 Depois de iniciar o Supabase, rode `npx supabase status` e copie para `.env.local` apenas os valores locais correspondentes. Nunca versione `.env.local`, chaves secretas, tokens ou estado do Terraform.
+
+Para testar o OTP local, use `+55 11 99999-9999` e o código `123456`. Esse par existe apenas em `supabase/config.toml`; produção usa o serviço Twilio configurado pelo Terraform.
 
 Validação completa:
 

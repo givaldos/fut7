@@ -12,14 +12,18 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { getTurnstileToken, resetTurnstile, TurnstileWidget } from "@/components/turnstile-widget";
+import { signUpErrorMessage } from "@/lib/auth/messages";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export function SignUpForm({
+  siteKey,
+  nonce,
   className,
   ...props
-}: React.ComponentPropsWithoutRef<"div">) {
+}: React.ComponentPropsWithoutRef<"div"> & { siteKey?: string; nonce?: string }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
@@ -29,7 +33,6 @@ export function SignUpForm({
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    const supabase = createClient();
     setIsLoading(true);
     setError(null);
 
@@ -39,17 +42,29 @@ export function SignUpForm({
       return;
     }
 
+    const captchaToken = getTurnstileToken(e.currentTarget as HTMLFormElement);
+    const supabase = createClient();
+
     try {
       const { error } = await supabase.auth.signUp({
-        email,
+        email: email.trim().toLowerCase(),
         password,
         options: {
           emailRedirectTo: `${window.location.origin}/auth/confirm?next=/app`,
+          captchaToken,
         },
       });
-      if (error) throw error;
+      if (error) {
+        const message = signUpErrorMessage(error.code);
+        if (message) {
+          resetTurnstile();
+          setError(message);
+          return;
+        }
+      }
       router.push("/auth/sign-up-success");
     } catch {
+      resetTurnstile();
       setError("Não foi possível criar a conta. Revise os dados e tente novamente.");
     } finally {
       setIsLoading(false);
@@ -71,6 +86,8 @@ export function SignUpForm({
                 <Input
                   id="email"
                   type="email"
+                  autoComplete="email"
+                  maxLength={254}
                   placeholder="voce@exemplo.com"
                   required
                   value={email}
@@ -85,6 +102,7 @@ export function SignUpForm({
                   id="password"
                   type="password"
                   minLength={12}
+                  maxLength={128}
                   autoComplete="new-password"
                   required
                   value={password}
@@ -99,6 +117,7 @@ export function SignUpForm({
                   id="repeat-password"
                   type="password"
                   minLength={12}
+                  maxLength={128}
                   autoComplete="new-password"
                   required
                   value={repeatPassword}
@@ -106,7 +125,8 @@ export function SignUpForm({
                 />
               </div>
               {error && <p className="text-sm text-red-500">{error}</p>}
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              <TurnstileWidget siteKey={siteKey} nonce={nonce} action="admin_signup" />
+              <Button type="submit" className="w-full" disabled={isLoading || (!siteKey && process.env.NODE_ENV === "production")}>
                 {isLoading ? "Criando conta..." : "Criar conta"}
               </Button>
             </div>

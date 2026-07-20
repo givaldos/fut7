@@ -1,7 +1,10 @@
 "use client";
 
+import {
+  updateRecoveredPassword,
+  type UpdateRecoveredPasswordState,
+} from "@/app/auth/update-password/actions";
 import { cn } from "@/lib/utils";
-import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -12,35 +15,14 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useActionState } from "react";
 
 export function UpdatePasswordForm({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
-
-  const handleForgotPassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const supabase = createClient();
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const { error } = await supabase.auth.updateUser({ password });
-      if (error) throw error;
-      router.replace("/app");
-      router.refresh();
-    } catch {
-      setError("Não foi possível atualizar a senha. Solicite um novo link.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const initialState: UpdateRecoveredPasswordState = {};
+  const [state, action, pending] = useActionState(updateRecoveredPassword, initialState);
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
@@ -52,24 +34,30 @@ export function UpdatePasswordForm({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleForgotPassword}>
+          <form action={action}>
             <div className="flex flex-col gap-6">
               <div className="grid gap-2">
                 <Label htmlFor="password">Nova senha</Label>
                 <Input
                   id="password"
+                  name="password"
                   type="password"
                   placeholder="Nova senha"
                   minLength={12}
+                  maxLength={128}
                   autoComplete="new-password"
                   required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
                 />
+                {state.errors?.password?.map((message) => <p key={message} className="text-xs text-red-600">{message}</p>)}
               </div>
-              {error && <p className="text-sm text-red-500">{error}</p>}
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Salvando..." : "Salvar nova senha"}
+              <div className="grid gap-2">
+                <Label htmlFor="repeat-password">Repita a nova senha</Label>
+                <Input id="repeat-password" name="repeatPassword" type="password" minLength={12} maxLength={128} autoComplete="new-password" required />
+                {state.errors?.repeatPassword?.map((message) => <p key={message} className="text-xs text-red-600">{message}</p>)}
+              </div>
+              {state.message ? <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm text-red-700">{state.message}</p> : null}
+              <Button type="submit" className="w-full" disabled={pending}>
+                {pending ? "Salvando..." : "Salvar nova senha"}
               </Button>
             </div>
           </form>
