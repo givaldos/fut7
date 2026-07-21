@@ -3,6 +3,7 @@ import {
   setAthleteAvailability,
 } from "@/app/app/[teamSlug]/athletes/actions";
 import { Button } from "@/components/ui/button";
+import { AppContainer, PageHeader } from "@/components/ui/app-shell";
 import { TeamAppHeader } from "@/components/team-app-header";
 import { TeamBottomNav } from "@/components/team-bottom-nav";
 import { requireUser } from "@/lib/auth/dal";
@@ -99,40 +100,40 @@ export default async function AthletesPage({
   const roster = (athletes ?? []).filter((athlete) => athlete.status !== "pending");
 
   return (
-    <main className="min-h-svh bg-slate-50 pb-24 text-slate-950">
-      <TeamAppHeader currentName={team.name} teams={teams ?? []} />
-      <div className="mx-auto max-w-5xl space-y-6 px-4 py-6 sm:py-10">
+    <main className="app-canvas pb-24">
+      <TeamAppHeader currentName={team.name} currentSlug={team.slug} teams={teams ?? []} />
+      <AppContainer>
         {query.created === "1" && (
           <div className="flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-medium text-emerald-950">
             <BadgeCheck className="size-5 shrink-0" aria-hidden /> Atleta cadastrado e incluído nas próximas chamadas.
           </div>
         )}
 
-        <section className="flex items-end justify-between gap-4">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-[0.16em] text-emerald-700">BID do time</p>
-            <h1 className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">Atletas</h1>
-            <p className="mt-1 text-sm text-slate-600">{athletes?.length ?? 0} cadastros · {pending.length} aguardando análise</p>
-          </div>
-          <Button asChild className="h-11 rounded-xl bg-emerald-700 px-3 hover:bg-emerald-800 sm:px-4">
-            <Link href={`/app/${team.slug}/athletes/new`}>
-              <Plus aria-hidden /> <span className="hidden sm:inline">Cadastrar atleta</span><span className="sm:hidden">Novo</span>
-            </Link>
-          </Button>
-        </section>
+        <PageHeader
+          eyebrow="BID do time"
+          title="Atletas"
+          description={`${athletes?.length ?? 0} cadastros · ${pending.length} aguardando análise`}
+          action={
+            <Button asChild>
+              <Link href={`/app/${team.slug}/athletes/new`}>
+                <Plus aria-hidden /> <span className="hidden sm:inline">Cadastrar atleta</span><span className="sm:hidden">Novo</span>
+              </Link>
+            </Button>
+          }
+        />
 
         {pending.length > 0 && (
           <section>
             <div className="flex items-center gap-2">
               <ShieldQuestion className="size-5 text-amber-600" aria-hidden />
-              <h2 className="font-bold">Confirmar vínculo</h2>
+              <h2 className="text-lg font-black tracking-tight">Confirmar vínculo</h2>
               <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-800">{pending.length}</span>
             </div>
             <div className="mt-3 grid gap-3 md:grid-cols-2">
               {pending.map((athlete) => {
                 const contact = privateByAthlete.get(athlete.id);
                 return (
-                  <article key={athlete.id} className="rounded-3xl border border-amber-200 bg-white p-5 shadow-sm">
+                  <article key={athlete.id} className="app-surface border-amber-200 p-5">
                     <div className="flex items-start gap-3">
                       <div className="grid size-11 shrink-0 place-items-center rounded-2xl bg-amber-50 text-amber-700"><Clock3 className="size-5" aria-hidden /></div>
                       <div className="min-w-0 flex-1">
@@ -170,7 +171,8 @@ export default async function AthletesPage({
         )}
 
         <section>
-          <h2 className="font-bold">Elenco</h2>
+          <p className="app-kicker">Disponibilidade</p>
+          <h2 className="mt-1 text-xl font-black tracking-tight">Elenco</h2>
           {roster.length ? (
             <div className="mt-3 grid gap-3 md:grid-cols-2">
               {roster.map((athlete) => {
@@ -178,7 +180,7 @@ export default async function AthletesPage({
                 const positions = positionsByAthlete.get(athlete.id) ?? [];
                 const canToggle = athlete.status === "active" || athlete.status === "inactive";
                 return (
-                  <article key={athlete.id} className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+                  <article key={athlete.id} className="app-surface p-5">
                     <div className="flex items-start gap-3">
                       <div className={`grid size-11 shrink-0 place-items-center rounded-2xl ${athlete.status === "active" ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-500"}`}>
                         {athlete.shirt_number ?? <UserRound className="size-5" aria-hidden />}
@@ -211,14 +213,14 @@ export default async function AthletesPage({
               })}
             </div>
           ) : (
-            <div className="mt-3 rounded-3xl border border-dashed border-slate-300 bg-white p-8 text-center">
+            <div className="app-surface mt-3 border-dashed p-8 text-center">
               <UserRound className="mx-auto size-8 text-slate-400" aria-hidden />
               <p className="mt-3 font-semibold">O elenco ainda está vazio</p>
               <p className="mt-1 text-sm text-slate-500">Cadastre diretamente ou aprove os pedidos recebidos.</p>
             </div>
           )}
         </section>
-      </div>
+      </AppContainer>
       <TeamBottomNav teamSlug={team.slug} active="athletes" nextEventId={nextEvent?.id} />
     </main>
   );

@@ -41,22 +41,22 @@ export default async function NewAthletePage({
   if (!membership) notFound();
 
   return (
-    <main className="min-h-svh bg-slate-50 text-slate-950">
-      <TeamAppHeader currentName={team.name} teams={teams ?? []} />
-      <div className="mx-auto max-w-2xl px-4 py-6 sm:py-10">
+    <main className="app-canvas">
+      <TeamAppHeader currentName={team.name} currentSlug={team.slug} teams={teams ?? []} />
+      <div className="mx-auto max-w-2xl px-4 py-6 sm:px-6 sm:py-10">
         <Link href={`/app/${team.slug}/athletes`} className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-slate-600 hover:text-emerald-800">
           <ArrowLeft className="size-4" aria-hidden /> Voltar ao BID
         </Link>
 
         <div className="mt-4">
-          <p className="text-xs font-bold uppercase tracking-[0.16em] text-emerald-700">Cadastro administrativo</p>
-          <h1 className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">Novo atleta</h1>
+          <p className="app-kicker">Cadastro administrativo</p>
+          <h1 className="app-title mt-2">Novo atleta</h1>
           <p className="mt-2 text-sm leading-6 text-slate-600">
             O atleta entra ativo. Dados de contato ficam visíveis apenas para a administração.
           </p>
         </div>
 
-        <section className="mt-6 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
+        <section className="app-surface mt-6 p-5 sm:p-7">
           <AdminAthleteForm teamId={team.id} teamSlug={team.slug} positions={positions ?? []} />
         </section>
 
@@ -68,4 +68,3 @@ export default async function NewAthletePage({
     </main>
   );
 }
-

@@ -1,4 +1,5 @@
 import { respondToEventAsPlayer } from "@/app/me/actions";
+import { AppContainer, PageHeader } from "@/components/ui/app-shell";
 import { requireUser } from "@/lib/auth/dal";
 import { createClient } from "@/lib/supabase/server";
 import {
@@ -101,24 +102,18 @@ export default async function PlayerAgendaPage() {
   ).length;
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6 px-4 py-6 sm:py-10">
-      <section className="flex items-end justify-between gap-4">
-        <div>
-          <p className="text-xs font-bold uppercase tracking-[0.16em] text-emerald-700">
-            Seus compromissos
-          </p>
-          <h1 className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">
-            Agenda
-          </h1>
-          <p className="mt-2 text-sm text-slate-600">
-            Confirme sua presença nos próximos eventos dos times aprovados.
-          </p>
-        </div>
-        <div className="shrink-0 rounded-2xl bg-white px-4 py-3 text-center shadow-sm">
-          <p className="text-xl font-black text-amber-700">{pendingCount}</p>
-          <p className="text-[10px] font-semibold text-slate-500">pendentes</p>
-        </div>
-      </section>
+    <AppContainer narrow>
+      <PageHeader
+        eyebrow="Seus compromissos"
+        title="Agenda"
+        description="Confirme sua presença e acompanhe cada partida."
+        action={
+          <div className="app-surface min-w-16 px-3 py-2.5 text-center">
+            <p className="text-xl font-black text-amber-700">{pendingCount}</p>
+            <p className="text-[10px] font-bold text-slate-500">pendentes</p>
+          </div>
+        }
+      />
 
       {events?.length ? (
         <section aria-label="Próximos eventos" className="space-y-3">
@@ -133,12 +128,12 @@ export default async function PlayerAgendaPage() {
             return (
               <article
                 key={event.id}
-                className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm"
+                className="app-surface overflow-hidden"
               >
                 <div className="p-5 sm:p-6">
                   <div className="flex items-start gap-4">
-                    <div className="min-w-14 rounded-2xl bg-emerald-50 px-2 py-2 text-center text-emerald-800">
-                      <p className="text-[10px] font-bold uppercase">
+                    <div className="min-w-14 rounded-2xl bg-slate-950 px-2 py-2.5 text-center text-white shadow-sm">
+                      <p className="text-[10px] font-bold uppercase text-emerald-300">
                         {new Intl.DateTimeFormat("pt-BR", {
                           month: "short",
                           timeZone:
@@ -222,7 +217,7 @@ export default async function PlayerAgendaPage() {
                           disabled={deadlineClosed}
                           data-active={currentStatus === status}
                           aria-label={`${label} — ${event.title}`}
-                          className={`flex min-h-12 w-full items-center justify-center gap-1.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600 disabled:cursor-not-allowed disabled:opacity-40 ${activeClass}`}
+                          className={`flex min-h-12 w-full touch-manipulation items-center justify-center gap-1.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 transition active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 ${activeClass}`}
                         >
                           <Icon className="size-4" aria-hidden />
                           {label}
@@ -249,7 +244,7 @@ export default async function PlayerAgendaPage() {
           })}
         </section>
       ) : (
-        <section className="rounded-3xl border border-dashed border-slate-300 bg-white p-8 text-center">
+        <section className="app-surface border-dashed p-8 text-center">
           <CalendarDays className="mx-auto size-9 text-slate-400" aria-hidden />
           <h2 className="mt-3 font-bold">Sua agenda está livre</h2>
           <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-slate-500">
@@ -275,7 +270,7 @@ export default async function PlayerAgendaPage() {
                 <Link
                   key={event.id}
                   href={`/me/agenda/${event.id}`}
-                  className="flex min-h-20 items-center gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:border-emerald-300"
+                  className="app-surface app-interactive flex min-h-20 items-center gap-4 p-4"
                 >
                   <div
                     className={`grid size-11 shrink-0 place-items-center rounded-2xl ${
@@ -316,6 +311,6 @@ export default async function PlayerAgendaPage() {
           </div>
         </section>
       ) : null}
-    </div>
+    </AppContainer>
   );
 }

@@ -69,7 +69,7 @@ export function CreateTeamForm() {
 
       <div className="space-y-2">
         <Label htmlFor="team-slug">Endereço público</Label>
-        <div className="flex items-center rounded-md border border-input bg-white shadow-sm focus-within:ring-1 focus-within:ring-ring">
+        <div className="flex items-center rounded-xl border border-input bg-white shadow-sm focus-within:border-primary/50 focus-within:ring-4 focus-within:ring-primary/10">
           <span className="pl-3 text-sm text-slate-500">/t/</span>
           <Input
             id="team-slug"

@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { AppContainer, PageHeader } from "@/components/ui/app-shell";
 import { requireUser } from "@/lib/auth/dal";
 import { createClient } from "@/lib/supabase/server";
 import {
@@ -111,7 +112,7 @@ export default async function PlayerProfilePage({
   ];
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6 px-4 py-6 sm:py-10">
+    <AppContainer narrow>
       {query.saved === "1" && (
         <div className="flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-medium text-emerald-950">
           <CheckCircle2 className="size-5 shrink-0" aria-hidden /> Perfil
@@ -119,34 +120,22 @@ export default async function PlayerProfilePage({
         </div>
       )}
 
-      <section className="flex items-end justify-between gap-4">
-        <div>
-          <p className="text-xs font-bold uppercase tracking-[0.16em] text-emerald-700">
-            Sua identidade
-          </p>
-          <h1 className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">
-            Perfil
-          </h1>
-          <p className="mt-2 text-sm text-slate-600">
-            Veja como seus dados esportivos estão apresentados.
-          </p>
-        </div>
-        {profile && (
-          <Button
-            asChild
-            className="h-11 shrink-0 rounded-xl bg-emerald-700 px-3 hover:bg-emerald-800 sm:px-4"
-          >
-            <Link href="/me/perfil/editar">
-              <Pencil aria-hidden /> Editar
-            </Link>
+      <PageHeader
+        eyebrow="Sua identidade"
+        title="Perfil"
+        description="Seu cartão esportivo, preferências e privacidade."
+        action={profile ? (
+          <Button asChild>
+            <Link href="/me/perfil/editar"><Pencil aria-hidden /> Editar</Link>
           </Button>
-        )}
-      </section>
+        ) : undefined}
+      />
 
       {profile ? (
         <>
-          <section className="overflow-hidden rounded-3xl bg-emerald-950 text-white shadow-sm">
-            <div className="p-6 sm:p-8">
+          <section className="relative overflow-hidden rounded-[2rem] bg-slate-950 text-white shadow-float">
+            <div className="pointer-events-none absolute -right-16 -top-20 size-64 rounded-full bg-emerald-500/20 blur-3xl" />
+            <div className="relative p-6 sm:p-8">
               <div className="grid size-14 place-items-center rounded-2xl bg-white/10 text-emerald-100">
                 <UserRound className="size-7" aria-hidden />
               </div>
@@ -188,7 +177,7 @@ export default async function PlayerProfilePage({
             </div>
           </section>
 
-          <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+          <section className="app-surface p-5 sm:p-6">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="text-xs font-bold uppercase tracking-wider text-emerald-700">
@@ -223,7 +212,7 @@ export default async function PlayerProfilePage({
             </p>
           </section>
 
-          <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+          <section className="app-surface p-5 sm:p-6">
             <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-emerald-700">
               <ShieldCheck className="size-4" aria-hidden /> Apresentação
             </p>
@@ -234,7 +223,7 @@ export default async function PlayerProfilePage({
             </p>
           </section>
 
-          <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+          <section className="app-surface p-5 sm:p-6">
             <h2 className="font-bold">Posições preferenciais</h2>
             <p className="mt-1 text-sm text-slate-500">
               A ordem indica sua prioridade em cada modalidade.
@@ -287,6 +276,6 @@ export default async function PlayerProfilePage({
           </p>
         </section>
       )}
-    </div>
+    </AppContainer>
   );
 }

@@ -55,8 +55,12 @@ export default {
       },
       borderRadius: {
         lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
+        md: "calc(var(--radius) - 3px)",
+        sm: "calc(var(--radius) - 6px)",
+      },
+      boxShadow: {
+        soft: "0 10px 35px -24px rgba(7, 35, 24, 0.45)",
+        float: "0 18px 50px -22px rgba(7, 35, 24, 0.45)",
       },
     },
   },

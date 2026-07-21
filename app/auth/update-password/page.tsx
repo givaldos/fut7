@@ -1,4 +1,5 @@
 import { UpdatePasswordForm } from "@/components/update-password-form";
+import { AuthShell } from "@/components/auth-shell";
 import { PASSWORD_RECOVERY_COOKIE } from "@/lib/auth/recovery";
 import { createClient } from "@/lib/supabase/server";
 import { cookies } from "next/headers";
@@ -19,10 +20,10 @@ export default async function Page() {
   }
 
   return (
-    <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
+    <AuthShell>
       <div className="w-full max-w-sm">
         <UpdatePasswordForm />
       </div>
-    </div>
+    </AuthShell>
   );
 }

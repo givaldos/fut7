@@ -133,7 +133,7 @@ export function PlayerProfileForm({
           </div>
           <div className="space-y-2">
             <Label htmlFor="handle">Endereço público</Label>
-            <div className="flex h-12 items-center rounded-md border border-input bg-white px-3 focus-within:ring-2 focus-within:ring-emerald-700">
+            <div className="flex h-12 items-center rounded-xl border border-input bg-white px-3 focus-within:border-primary/50 focus-within:ring-4 focus-within:ring-primary/10">
               <span className="text-sm text-slate-400">/p/</span>
               <input
                 id="handle"

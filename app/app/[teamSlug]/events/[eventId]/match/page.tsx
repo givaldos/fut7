@@ -4,6 +4,7 @@ import {
   MatchScoreForm,
 } from "@/components/admin-match-report";
 import { Button } from "@/components/ui/button";
+import { AppContainer } from "@/components/ui/app-shell";
 import { TeamAppHeader } from "@/components/team-app-header";
 import { requireUser } from "@/lib/auth/dal";
 import { createClient } from "@/lib/supabase/server";
@@ -141,9 +142,9 @@ export default async function MatchReportPage({
   const finalized = Boolean(report?.finalized_at);
 
   return (
-    <main className="min-h-svh bg-slate-50 pb-16 text-slate-950">
-      <TeamAppHeader currentName={team.name} teams={teams ?? []} />
-      <div className="mx-auto max-w-5xl space-y-6 px-4 py-6 sm:py-10">
+    <main className="app-canvas pb-24">
+      <TeamAppHeader currentName={team.name} currentSlug={team.slug} teams={teams ?? []} />
+      <AppContainer>
         <div className="flex items-center justify-between gap-3">
           <Link
             href={`/app/${team.slug}/events/${event.id}`}
@@ -158,8 +159,9 @@ export default async function MatchReportPage({
           )}
         </div>
 
-        <section className="overflow-hidden rounded-3xl bg-slate-950 text-white shadow-sm">
-          <div className="p-6 sm:p-8">
+        <section className="relative overflow-hidden rounded-[2rem] bg-slate-950 text-white shadow-float">
+          <div className="pointer-events-none absolute -right-20 -top-24 size-64 rounded-full bg-emerald-500/20 blur-3xl" />
+          <div className="relative p-6 sm:p-8">
             <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-emerald-300">
               <span>{kindLabels[event.kind]}</span>
               <span>·</span>
@@ -205,7 +207,7 @@ export default async function MatchReportPage({
         </section>
 
         <div className="grid items-start gap-6 lg:grid-cols-2">
-          <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+          <section className="app-surface p-5 sm:p-6">
             <div className="mb-5 flex items-start gap-3">
               <div className="grid size-10 shrink-0 place-items-center rounded-2xl bg-emerald-50 text-emerald-700">
                 <ListPlus className="size-5" aria-hidden />
@@ -247,7 +249,7 @@ export default async function MatchReportPage({
             ) : null}
           </section>
 
-          <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+          <section className="app-surface p-5 sm:p-6">
             <div className="mb-5 flex items-start gap-3">
               <div className="grid size-10 shrink-0 place-items-center rounded-2xl bg-sky-50 text-sky-700">
                 <NotebookTabs className="size-5" aria-hidden />
@@ -312,7 +314,7 @@ export default async function MatchReportPage({
                 return (
                   <article
                     key={incident.id}
-                    className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"
+                    className="app-surface flex items-center gap-3 p-4"
                   >
                     <div
                       className={`grid size-10 shrink-0 place-items-center rounded-2xl ${iconColor}`}
@@ -364,7 +366,7 @@ export default async function MatchReportPage({
               })}
             </div>
           ) : (
-            <div className="mt-3 rounded-3xl border border-dashed border-slate-300 bg-white p-8 text-center">
+            <div className="app-surface mt-3 border-dashed p-8 text-center">
               <Trophy className="mx-auto size-8 text-slate-400" aria-hidden />
               <p className="mt-3 font-semibold">Nenhum lance registrado</p>
               <p className="mt-1 text-sm text-slate-500">
@@ -375,7 +377,7 @@ export default async function MatchReportPage({
           )}
         </section>
 
-        <p className="flex items-start gap-2 rounded-2xl bg-white p-4 text-xs leading-5 text-slate-500">
+        <p className="app-surface flex items-start gap-2 p-4 text-xs leading-5 text-slate-500">
           <CalendarDays
             className="mt-0.5 size-4 shrink-0 text-emerald-700"
             aria-hidden
@@ -383,7 +385,7 @@ export default async function MatchReportPage({
           Gols, assistências e cartões entram nas estatísticas dos atletas
           somente depois que a partida for encerrada.
         </p>
-      </div>
+      </AppContainer>
     </main>
   );
 }

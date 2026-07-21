@@ -7,6 +7,7 @@ Plataforma multi-time, mobile-first e preparada para WhatsApp para organizar atl
 Esta fundação já entrega:
 
 - aplicação Next.js 16/Node.js 24 em português;
+- design system próprio sobre Tailwind e Radix, com navegação e alvos de toque mobile-first;
 - autenticação Supabase com sessão em cookies;
 - identidade global do atleta com login sem senha por OTP no WhatsApp;
 - perfil pessoal editável e público/privado em `/p/{handle}`, conectado a vários times;

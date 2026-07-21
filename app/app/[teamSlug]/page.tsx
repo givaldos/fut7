@@ -1,8 +1,8 @@
 import { revokeTeamInvitation } from "@/app/app/team-actions";
 import { AdminInviteForm } from "@/components/admin-invite-form";
-import { LogoutButton } from "@/components/logout-button";
-import { TeamSwitcher } from "@/components/team-switcher";
+import { TeamAppHeader } from "@/components/team-app-header";
 import { TeamBottomNav } from "@/components/team-bottom-nav";
+import { AppContainer, PageHeader } from "@/components/ui/app-shell";
 import { Button } from "@/components/ui/button";
 import { requireUser } from "@/lib/auth/dal";
 import { getAppUrl } from "@/lib/env/server";
@@ -13,7 +13,7 @@ import {
   Check,
   CheckCircle2,
   Circle,
-  ClipboardList,
+  NotebookTabs,
   ExternalLink,
   MessageCircle,
   Plus,
@@ -99,21 +99,14 @@ export default async function TeamDashboardPage({
   const completedSteps = activationSteps.filter((step) => step.complete).length;
 
   return (
-    <main className="min-h-svh bg-slate-50 pb-24 text-slate-950">
-      <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-4">
-          <div className="flex items-center gap-3">
-            <Link href="/" className="font-black tracking-[0.14em] text-emerald-800">
-              FUT7
-            </Link>
-            <div className="h-5 w-px bg-slate-200" />
-            <TeamSwitcher currentName={currentTeam.name} teams={teams ?? []} />
-          </div>
-          <LogoutButton />
-        </div>
-      </header>
+    <main className="app-canvas pb-24">
+      <TeamAppHeader
+        currentName={currentTeam.name}
+        currentSlug={currentTeam.slug}
+        teams={teams ?? []}
+      />
 
-      <div className="mx-auto max-w-5xl space-y-6 px-4 py-6 sm:py-10">
+      <AppContainer>
         {query.created === "1" && (
           <section className="flex items-start gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-emerald-950">
             <BadgeCheck className="mt-0.5 size-5 shrink-0" aria-hidden />
@@ -126,26 +119,22 @@ export default async function TeamDashboardPage({
           </section>
         )}
 
-        <section className="flex items-end justify-between gap-4">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-[0.16em] text-emerald-700">
-              Painel do time
-            </p>
-            <h1 className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">
-              O que vem agora
-            </h1>
-          </div>
-          <Link
-            href={`/app/${currentTeam.slug}/events/new`}
-            className="grid size-11 place-items-center rounded-full bg-emerald-700 text-white shadow-sm"
-            aria-label="Criar novo evento"
-          >
-            <Plus aria-hidden />
-          </Link>
-        </section>
+        <PageHeader
+          eyebrow="Painel do time"
+          title="Visão geral"
+          description="Próximo jogo, elenco e ações importantes sem ruído."
+          action={
+            <Button asChild>
+              <Link href={`/app/${currentTeam.slug}/events/new`}>
+                <Plus aria-hidden /> <span className="hidden sm:inline">Novo evento</span><span className="sm:hidden">Novo</span>
+              </Link>
+            </Button>
+          }
+        />
 
         <section className="grid gap-4 sm:grid-cols-2">
-          <article className="rounded-3xl bg-emerald-950 p-6 text-white shadow-sm">
+          <article className="relative overflow-hidden rounded-[2rem] bg-slate-950 p-6 text-white shadow-float sm:p-7">
+            <div className="pointer-events-none absolute -right-20 -top-24 size-56 rounded-full bg-emerald-500/20 blur-3xl" />
             <div className="flex items-center justify-between">
               <CalendarDays className="size-6 text-emerald-300" aria-hidden />
               <span className="rounded-full bg-white/10 px-3 py-1 text-xs text-emerald-100">
@@ -154,7 +143,7 @@ export default async function TeamDashboardPage({
             </div>
             {nextEvent ? (
               <>
-                <h2 className="mt-8 text-xl font-semibold">{nextEvent.title}</h2>
+                <h2 className="mt-8 text-2xl font-black tracking-tight">{nextEvent.title}</h2>
                 <p className="mt-2 text-sm text-emerald-100">
                   {new Intl.DateTimeFormat("pt-BR", {
                     dateStyle: "full",
@@ -162,32 +151,36 @@ export default async function TeamDashboardPage({
                     timeZone: currentTeam.timezone,
                   }).format(new Date(nextEvent.starts_at))}
                 </p>
-                <Link href={`/app/${currentTeam.slug}/events/${nextEvent.id}`} className="mt-5 inline-flex min-h-10 items-center text-sm font-semibold text-emerald-200 hover:text-white">
-                  Abrir chamada
+                <Link href={`/app/${currentTeam.slug}/events/${nextEvent.id}`} className="mt-6 inline-flex min-h-11 items-center gap-2 rounded-xl bg-white px-4 text-sm font-bold text-slate-950 transition hover:bg-emerald-50">
+                  Abrir chamada <CalendarDays className="size-4" aria-hidden />
                 </Link>
               </>
             ) : (
               <>
-                <h2 className="mt-8 text-xl font-semibold">Agenda livre</h2>
+                <h2 className="mt-8 text-2xl font-black tracking-tight">Agenda livre</h2>
                 <p className="mt-2 text-sm text-emerald-100">
                   Crie um jogo avulso ou programe as próximas semanas.
                 </p>
-                <Link href={`/app/${currentTeam.slug}/events/new`} className="mt-5 inline-flex min-h-10 items-center text-sm font-semibold text-emerald-200 hover:text-white">
+                <Link href={`/app/${currentTeam.slug}/events/new`} className="mt-6 inline-flex min-h-11 items-center rounded-xl bg-white px-4 text-sm font-bold text-slate-950">
                   Criar primeiro evento
                 </Link>
               </>
             )}
           </article>
 
-          <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <UsersRound className="size-6 text-emerald-700" aria-hidden />
-            <p className="mt-8 text-4xl font-bold tracking-tight">{athleteCount ?? 0}</p>
-            <p className="mt-1 text-sm text-slate-600">atletas ativos no BID do time</p>
+          <article className="app-surface p-6 sm:p-7">
+            <div className="flex items-start justify-between gap-4">
+              <span className="grid size-11 place-items-center rounded-2xl bg-emerald-50 text-emerald-700"><UsersRound className="size-5" aria-hidden /></span>
+              <span className="rounded-full bg-slate-100 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-500">BID ativo</span>
+            </div>
+            <p className="mt-7 text-5xl font-black tracking-[-0.05em]">{athleteCount ?? 0}</p>
+            <p className="mt-1 text-sm font-medium text-slate-600">atletas disponíveis no elenco</p>
+            <Link href={`/app/${currentTeam.slug}/athletes`} className="mt-5 inline-flex min-h-11 items-center text-sm font-bold text-emerald-700">Gerenciar atletas</Link>
           </article>
         </section>
 
         <section className="grid gap-4 lg:grid-cols-[1.1fr_.9fr]">
-          <article className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+          <article className="app-surface p-5 sm:p-6">
             <div className="flex items-center justify-between gap-4">
               <div>
                 <p className="text-xs font-bold uppercase tracking-wider text-emerald-700">
@@ -215,7 +208,7 @@ export default async function TeamDashboardPage({
             </ul>
           </article>
 
-          <article className="rounded-3xl border border-emerald-200 bg-emerald-50 p-5 sm:p-6">
+          <article className="rounded-[1.5rem] border border-emerald-200/80 bg-emerald-50 p-5 shadow-soft sm:p-6">
             <MessageCircle className="size-6 text-emerald-800" aria-hidden />
             <h2 className="mt-4 text-lg font-bold text-emerald-950">Forme o elenco pelo WhatsApp</h2>
             <p className="mt-2 text-sm leading-6 text-emerald-900/80">
@@ -238,7 +231,7 @@ export default async function TeamDashboardPage({
 
         {canManageInvitations && (
           <section className="grid gap-4 lg:grid-cols-2">
-            <article className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+            <article className="app-surface p-5 sm:p-6">
               <div className="flex items-center gap-3">
                 <div className="grid size-10 place-items-center rounded-2xl bg-slate-100 text-slate-700">
                   <UserPlus className="size-5" aria-hidden />
@@ -257,7 +250,7 @@ export default async function TeamDashboardPage({
               </div>
             </article>
 
-            <article className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+            <article className="app-surface p-5 sm:p-6">
               <div className="flex items-center justify-between gap-3">
                 <h2 className="font-bold">Convites pendentes</h2>
                 <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
@@ -291,20 +284,21 @@ export default async function TeamDashboardPage({
           </section>
         )}
 
-        <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-          <h2 className="font-semibold">Atalhos</h2>
+        <section className="app-surface p-5">
+          <p className="app-kicker">Acesso rápido</p>
+          <h2 className="mt-1 text-lg font-black tracking-tight">Atalhos</h2>
           <div className="mt-4 grid grid-cols-3 gap-3">
             {[
               [UsersRound, "Atletas", `/app/${currentTeam.slug}/athletes`],
               [Check, "Presenças", nextEvent ? `/app/${currentTeam.slug}/events/${nextEvent.id}` : `/app/${currentTeam.slug}/events`],
-              [ClipboardList, "Escalar", nextEvent ? `/app/${currentTeam.slug}/events/${nextEvent.id}#lineup` : `/app/${currentTeam.slug}/events`],
+              [NotebookTabs, "Súmula", nextEvent ? `/app/${currentTeam.slug}/events/${nextEvent.id}/match` : `/app/${currentTeam.slug}/events`],
             ].map(([Icon, label, href]) => {
               const ShortcutIcon = Icon as typeof UsersRound;
               return (
                 <Link
                   key={label as string}
                   href={href as string}
-                  className="rounded-2xl bg-slate-50 px-2 py-4 text-center text-xs font-medium text-slate-700 hover:bg-emerald-50 hover:text-emerald-900"
+                  className="rounded-2xl bg-slate-50 px-2 py-4 text-center text-xs font-bold text-slate-700 transition active:scale-95 hover:bg-emerald-50 hover:text-emerald-900"
                 >
                   <ShortcutIcon className="mx-auto mb-2 size-5" aria-hidden />
                   {label as string}
@@ -313,7 +307,7 @@ export default async function TeamDashboardPage({
             })}
           </div>
         </section>
-      </div>
+      </AppContainer>
 
       <TeamBottomNav teamSlug={currentTeam.slug} active="home" nextEventId={nextEvent?.id} />
     </main>

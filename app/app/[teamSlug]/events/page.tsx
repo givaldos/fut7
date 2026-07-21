@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { AppContainer, PageHeader } from "@/components/ui/app-shell";
 import { TeamAppHeader } from "@/components/team-app-header";
 import { TeamBottomNav } from "@/components/team-bottom-nav";
 import { requireUser } from "@/lib/auth/dal";
@@ -76,25 +77,39 @@ export default async function EventsPage({ params }: { params: Promise<{ teamSlu
 
   const renderEvent = (event: NonNullable<typeof events>[number]) => {
     const call = attendanceByEvent.get(event.id) ?? { total: 0, confirmed: 0 };
+    const confirmationProgress = call.total
+      ? Math.round((call.confirmed / call.total) * 100)
+      : 0;
     return (
-      <Link key={event.id} href={`/app/${team.slug}/events/${event.id}`} className="group block rounded-3xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-emerald-300">
+      <Link key={event.id} href={`/app/${team.slug}/events/${event.id}`} className="app-surface app-interactive group block p-4 sm:p-5">
         <div className="flex items-start gap-4">
-          <div className="min-w-14 rounded-2xl bg-emerald-50 px-2 py-2 text-center text-emerald-800">
-            <p className="text-[10px] font-bold uppercase">{new Intl.DateTimeFormat("pt-BR", { month: "short", timeZone: team.timezone }).format(new Date(event.starts_at)).replace(".", "")}</p>
+          <div className="min-w-14 rounded-2xl bg-slate-950 px-2 py-2.5 text-center text-white shadow-sm">
+            <p className="text-[10px] font-bold uppercase text-emerald-300">{new Intl.DateTimeFormat("pt-BR", { month: "short", timeZone: team.timezone }).format(new Date(event.starts_at)).replace(".", "")}</p>
             <p className="text-xl font-black">{new Intl.DateTimeFormat("pt-BR", { day: "2-digit", timeZone: team.timezone }).format(new Date(event.starts_at))}</p>
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex items-start justify-between gap-2">
               <div>
                 <p className="text-xs font-semibold text-emerald-700">{kindLabels[event.kind]} · {event.sport_format === "field" ? "Campo" : event.sport_format === "futsal" ? "Futsal" : "Society"}</p>
-                <h2 className="mt-1 truncate font-bold text-slate-950">{event.title}</h2>
+                <h2 className="mt-1 truncate text-base font-black tracking-tight text-slate-950">{event.title}</h2>
               </div>
               <ChevronRight className="size-5 shrink-0 text-slate-300 transition group-hover:text-emerald-700" aria-hidden />
             </div>
-            <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500">
+            <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5 text-xs font-medium text-slate-500">
               <span className="flex items-center gap-1.5"><Clock3 className="size-3.5" aria-hidden /> {new Intl.DateTimeFormat("pt-BR", { hour: "2-digit", minute: "2-digit", timeZone: team.timezone }).format(new Date(event.starts_at))}</span>
               {event.venue_id && <span className="flex items-center gap-1.5"><MapPin className="size-3.5" aria-hidden /> {venueById.get(event.venue_id)}</span>}
               <span className="flex items-center gap-1.5"><UsersRound className="size-3.5" aria-hidden /> {call.confirmed}/{call.total} confirmados</span>
+            </div>
+            <div className="mt-4 flex items-center gap-3">
+              <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-100">
+                <div
+                  className="h-full rounded-full bg-emerald-500"
+                  style={{ width: `${confirmationProgress}%` }}
+                />
+              </div>
+              <span className="text-[10px] font-bold text-slate-400">
+                {confirmationProgress}%
+              </span>
             </div>
           </div>
         </div>
@@ -103,41 +118,42 @@ export default async function EventsPage({ params }: { params: Promise<{ teamSlu
   };
 
   return (
-    <main className="min-h-svh bg-slate-50 pb-24 text-slate-950">
-      <TeamAppHeader currentName={team.name} teams={teams ?? []} />
-      <div className="mx-auto max-w-5xl space-y-6 px-4 py-6 sm:py-10">
-        <section className="flex items-end justify-between gap-4">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-[0.16em] text-emerald-700">Organização</p>
-            <h1 className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">Agenda</h1>
-            <p className="mt-1 text-sm text-slate-600">{upcoming.length} próximos eventos</p>
-          </div>
-          <Button asChild className="h-11 rounded-xl bg-emerald-700 px-3 hover:bg-emerald-800 sm:px-4">
-            <Link href={`/app/${team.slug}/events/new`}><Plus aria-hidden /> Novo evento</Link>
-          </Button>
-        </section>
+    <main className="app-canvas pb-24">
+      <TeamAppHeader currentName={team.name} currentSlug={team.slug} teams={teams ?? []} />
+      <AppContainer>
+        <PageHeader
+          eyebrow="Organização"
+          title="Agenda"
+          description={`${upcoming.length} próximo${upcoming.length === 1 ? " evento" : "s eventos"} · acompanhe chamadas e súmulas em um só lugar.`}
+          action={
+            <Button asChild>
+              <Link href={`/app/${team.slug}/events/new`}><Plus aria-hidden /> <span className="hidden sm:inline">Novo evento</span><span className="sm:hidden">Novo</span></Link>
+            </Button>
+          }
+        />
 
         <section>
-          <h2 className="font-bold">Próximos</h2>
+          <p className="app-kicker">Em aberto</p>
+          <h2 className="mt-1 text-xl font-black tracking-tight">Próximos jogos</h2>
           {upcoming.length ? (
             <div className="mt-3 grid gap-3 lg:grid-cols-2">{upcoming.map(renderEvent)}</div>
           ) : (
-            <div className="mt-3 rounded-3xl border border-dashed border-slate-300 bg-white p-8 text-center">
+            <div className="app-surface mt-3 border-dashed p-8 text-center">
               <CalendarDays className="mx-auto size-8 text-slate-400" aria-hidden />
               <p className="mt-3 font-semibold">Nenhum jogo agendado</p>
               <p className="mt-1 text-sm text-slate-500">Crie um evento avulso ou uma sequência semanal.</p>
-              <Button asChild className="mt-5 h-11 rounded-xl bg-emerald-700 hover:bg-emerald-800"><Link href={`/app/${team.slug}/events/new`}>Criar primeiro evento</Link></Button>
+              <Button asChild className="mt-5"><Link href={`/app/${team.slug}/events/new`}>Criar primeiro evento</Link></Button>
             </div>
           )}
         </section>
 
         {history.length > 0 && (
           <section>
-            <div className="flex items-center gap-2"><CheckCircle2 className="size-5 text-slate-500" aria-hidden /><h2 className="font-bold">Histórico</h2></div>
-            <div className="mt-3 grid gap-3 opacity-75 lg:grid-cols-2">{history.map(renderEvent)}</div>
+            <div className="flex items-center gap-2"><CheckCircle2 className="size-5 text-slate-500" aria-hidden /><h2 className="text-lg font-black tracking-tight">Histórico</h2></div>
+            <div className="mt-3 grid gap-3 lg:grid-cols-2">{history.map(renderEvent)}</div>
           </section>
         )}
-      </div>
+      </AppContainer>
       <TeamBottomNav teamSlug={team.slug} active="events" nextEventId={upcoming[0]?.id} />
     </main>
   );

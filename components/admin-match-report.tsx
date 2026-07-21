@@ -283,7 +283,7 @@ export function MatchIncidentForm({
             setAthleteId(event.target.value);
             if (assistAthleteId === event.target.value) setAssistAthleteId("");
           }}
-          className="h-12 w-full rounded-md border border-input bg-white px-3 text-sm shadow-sm"
+          className="h-12 w-full rounded-xl border border-input bg-white px-3 text-sm"
           required
         >
           <option value="">Selecione o atleta</option>
@@ -305,7 +305,7 @@ export function MatchIncidentForm({
               name="scoringSide"
               value={scoringSide}
               onChange={(event) => setScoringSide(event.target.value)}
-              className="h-12 w-full rounded-md border border-input bg-white px-3 text-sm shadow-sm"
+              className="h-12 w-full rounded-xl border border-input bg-white px-3 text-sm"
               required
             >
               <option value="1">{sideALabel}</option>
@@ -319,7 +319,7 @@ export function MatchIncidentForm({
               name="assistAthleteId"
               value={assistAthleteId}
               onChange={(event) => setAssistAthleteId(event.target.value)}
-              className="h-12 w-full rounded-md border border-input bg-white px-3 text-sm shadow-sm"
+              className="h-12 w-full rounded-xl border border-input bg-white px-3 text-sm"
             >
               <option value="">Sem assistência</option>
               {athletes

@@ -9,7 +9,7 @@ export const metadata: Metadata = {
     template: "%s | FUT7",
   },
   description:
-    "Atletas, agenda, presença, divisão de times e escalação em um só lugar.",
+    "BID, agenda, presença, súmula e estatísticas do seu futebol em um só lugar.",
   applicationName: "FUT7",
   robots: { index: true, follow: true },
 };

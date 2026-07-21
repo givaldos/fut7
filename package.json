@@ -1,7 +1,7 @@
 {
   "name": "fut7",
   "version": "0.1.0",
-  "description": "Plataforma multi-time para organizar atletas, agendas, presenças e escalações.",
+  "description": "Plataforma multi-time para organizar atletas, agendas, presenças, súmulas e estatísticas.",
   "private": true,
   "engines": {
     "node": "24.x",

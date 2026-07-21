@@ -13,7 +13,7 @@ export default async function PlayerPortalLayout({
   await requireUser();
 
   return (
-    <main className="min-h-svh bg-slate-50 pb-24 text-slate-950 sm:pb-12">
+    <main className="app-canvas pb-24 sm:pb-12">
       <PlayerPortalNavigation />
       {children}
     </main>

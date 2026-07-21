@@ -1,4 +1,5 @@
 import { AthleteOtpLoginForm } from "@/components/athlete-otp-login-form";
+import { AuthShell } from "@/components/auth-shell";
 import { LoginForm } from "@/components/login-form";
 import { getSessionDestination } from "@/lib/auth/dal";
 import { safeInternalPath } from "@/lib/security/redirects";
@@ -26,7 +27,7 @@ export default async function Page({
   const athleteNextPath = safeInternalPath(params.next, "/me");
   const adminNextPath = safeInternalPath(params.next, "/app");
   return (
-    <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
+    <AuthShell>
       <div className="w-full max-w-sm space-y-5">
         {params.password === "updated" ? (
           <p role="status" className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
@@ -39,6 +40,6 @@ export default async function Page({
         </div>
         <LoginForm nextPath={adminNextPath} siteKey={turnstile?.siteKey} nonce={nonce} />
       </div>
-    </div>
+    </AuthShell>
   );
 }

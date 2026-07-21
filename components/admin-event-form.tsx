@@ -185,7 +185,7 @@ export function AdminEventForm({
             name="kind"
             value={values.kind}
             onChange={(event) => updateKind(event.target.value)}
-            className="h-12 w-full rounded-md border border-input bg-white px-3 text-sm shadow-sm"
+            className="h-12 w-full rounded-xl border border-input bg-white px-3 text-sm"
             required
             aria-invalid={Boolean(kindError)}
             aria-describedby={kindError ? "event-kind-error" : undefined}
@@ -206,7 +206,7 @@ export function AdminEventForm({
             name="sportFormat"
             value={values.sportFormat}
             onChange={(event) => updateField("sportFormat", event.target.value)}
-            className="h-12 w-full rounded-md border border-input bg-white px-3 text-sm shadow-sm"
+            className="h-12 w-full rounded-xl border border-input bg-white px-3 text-sm"
             required
             aria-invalid={Boolean(sportFormatError)}
             aria-describedby={sportFormatError ? "sport-format-error" : undefined}
@@ -254,7 +254,7 @@ export function AdminEventForm({
             onChange={(event) =>
               updateField("durationMinutes", event.target.value)
             }
-            className="h-12 w-full rounded-md border border-input bg-white px-3 text-sm shadow-sm"
+            className="h-12 w-full rounded-xl border border-input bg-white px-3 text-sm"
             aria-invalid={Boolean(durationError)}
             aria-describedby={durationError ? "duration-error" : undefined}
           >
@@ -274,7 +274,7 @@ export function AdminEventForm({
             onChange={(event) =>
               updateField("deadlineMinutes", event.target.value)
             }
-            className="h-12 w-full rounded-md border border-input bg-white px-3 text-sm shadow-sm"
+            className="h-12 w-full rounded-xl border border-input bg-white px-3 text-sm"
             aria-invalid={Boolean(deadlineError)}
             aria-describedby={deadlineError ? "deadline-error" : undefined}
           >

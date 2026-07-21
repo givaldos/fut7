@@ -2,6 +2,7 @@ import {
   acceptTeamInvitation,
   declineTeamInvitation,
 } from "@/app/app/invitation-actions";
+import { BrandMark } from "@/components/brand-mark";
 import { Button } from "@/components/ui/button";
 import { LogoutButton } from "@/components/logout-button";
 import { requireUser } from "@/lib/auth/dal";
@@ -65,12 +66,10 @@ export default async function AppIndexPage({
   const query = await searchParams;
 
   return (
-    <main className="min-h-svh bg-slate-50 pb-10 text-slate-950">
-      <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex h-16 max-w-3xl items-center justify-between px-4">
-          <Link href="/" className="font-black tracking-[0.14em] text-emerald-800">
-            FUT7
-          </Link>
+    <main className="app-canvas pb-10">
+      <header className="sticky top-0 z-40 border-b border-slate-200/70 bg-white/85 backdrop-blur-xl">
+        <div className="mx-auto flex h-[4.5rem] max-w-3xl items-center justify-between px-4 sm:px-6">
+          <BrandMark href="/app" />
           <LogoutButton />
         </div>
       </header>
@@ -100,7 +99,7 @@ export default async function AppIndexPage({
               {pendingInvitations.map((invitation) => (
                 <article
                   key={invitation.invitation_id}
-                  className="rounded-3xl border border-emerald-200 bg-white p-5 shadow-sm sm:p-6"
+                  className="app-surface border-emerald-200 p-5 sm:p-6"
                 >
                   <div className="flex items-start gap-4">
                     <div className="grid size-11 shrink-0 place-items-center rounded-2xl bg-emerald-100 text-emerald-800">
@@ -130,7 +129,8 @@ export default async function AppIndexPage({
             </section>
           </>
         ) : (
-          <section className="rounded-3xl bg-emerald-950 p-6 text-white shadow-sm sm:p-8">
+          <section className="relative overflow-hidden rounded-[2rem] bg-slate-950 p-6 text-white shadow-float sm:p-8">
+            <div className="pointer-events-none absolute -right-20 -top-24 size-64 rounded-full bg-emerald-500/20 blur-3xl" />
             <div className="grid size-12 place-items-center rounded-2xl bg-white/10 text-emerald-200">
               <ShieldCheck className="size-6" aria-hidden />
             </div>
@@ -145,7 +145,7 @@ export default async function AppIndexPage({
         )}
 
         <section className="grid gap-4 sm:grid-cols-2">
-          <article className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+          <article className="app-surface p-5">
             <div className="grid size-10 place-items-center rounded-2xl bg-emerald-100 text-emerald-800">
               <Plus className="size-5" aria-hidden />
             </div>
@@ -158,7 +158,7 @@ export default async function AppIndexPage({
             </Button>
           </article>
 
-          <article className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+          <article className="app-surface p-5">
             <div className="grid size-10 place-items-center rounded-2xl bg-slate-100 text-slate-700">
               <UsersRound className="size-5" aria-hidden />
             </div>

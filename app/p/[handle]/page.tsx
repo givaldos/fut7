@@ -1,4 +1,5 @@
 import { getPublicPlayer } from "@/lib/data/public-player";
+import { BrandMark } from "@/components/brand-mark";
 import {
   BadgeCheck,
   Goal,
@@ -9,7 +10,6 @@ import {
   Trophy,
   UserRound,
 } from "lucide-react";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 
 type PublicPosition = {
@@ -37,20 +37,21 @@ export default async function PublicPlayerPage({ params }: { params: Promise<{ h
   ] as const;
 
   return (
-    <main className="min-h-svh bg-slate-50 pb-12 text-slate-950">
-      <header className="bg-emerald-950 px-5 pb-20 pt-6 text-white">
-        <div className="mx-auto max-w-xl">
-          <Link href="/" className="text-sm font-black tracking-[0.14em] text-emerald-200">FUT7</Link>
+    <main className="app-canvas pb-12">
+      <header className="relative overflow-hidden bg-slate-950 px-5 pb-20 pt-6 text-white">
+        <div className="pointer-events-none absolute -right-20 -top-24 size-64 rounded-full bg-emerald-500/20 blur-3xl" />
+        <div className="relative mx-auto max-w-xl">
+          <BrandMark className="[&_span:last-child]:text-white" />
           <div className="mt-10 grid size-20 place-items-center rounded-3xl bg-white/10 text-emerald-100">
             <UserRound className="size-9" aria-hidden />
           </div>
           <div className="mt-5 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-emerald-300"><BadgeCheck className="size-4" aria-hidden /> Perfil verificado</div>
-          <h1 className="mt-2 text-3xl font-black tracking-tight">{player.preferred_name || player.display_name}</h1>
+          <h1 className="mt-2 text-4xl font-black tracking-[-0.045em]">{player.preferred_name || player.display_name}</h1>
           {player.preferred_name ? <p className="mt-1 text-sm text-emerald-100">{player.display_name}</p> : null}
         </div>
       </header>
       <div className="mx-auto -mt-10 max-w-xl space-y-5 px-4">
-        <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+        <section className="app-surface p-5">
           <div className="flex items-center justify-between gap-3">
             <div>
               <p className="text-xs font-bold uppercase tracking-wider text-emerald-700">Jogos encerrados</p>
@@ -68,12 +69,12 @@ export default async function PublicPlayerPage({ params }: { params: Promise<{ h
             ))}
           </div>
         </section>
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+        <section className="app-surface p-6">
           <div className="flex items-center gap-2 text-xs font-semibold text-emerald-700"><ShieldCheck className="size-4" aria-hidden /> Publicado pelo próprio atleta</div>
           <h2 className="mt-5 font-bold">Sobre meu futebol</h2>
           <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-slate-600">{player.bio || "Este atleta ainda não adicionou uma apresentação."}</p>
         </section>
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+        <section className="app-surface p-6">
           <h2 className="font-bold">Posições preferenciais</h2>
           {positions.length ? (
             <div className="mt-4 space-y-4">

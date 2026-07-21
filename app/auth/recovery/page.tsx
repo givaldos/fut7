@@ -1,5 +1,6 @@
 import { beginPasswordRecovery } from "@/app/auth/recovery/actions";
 import { ClearConfirmationUrl } from "@/app/auth/confirm/clear-confirmation-url";
+import { AuthShell } from "@/components/auth-shell";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { redirect } from "next/navigation";
@@ -23,7 +24,7 @@ export default async function PasswordRecoveryPage({
   }
 
   return (
-    <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
+    <AuthShell>
       <ClearConfirmationUrl />
       <div className="w-full max-w-sm">
         <Card>
@@ -43,6 +44,6 @@ export default async function PasswordRecoveryPage({
           </CardContent>
         </Card>
       </div>
-    </div>
+    </AuthShell>
   );
 }

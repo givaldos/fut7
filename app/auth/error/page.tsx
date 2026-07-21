@@ -1,10 +1,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { AuthShell } from "@/components/auth-shell";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
 export default function Page() {
   return (
-    <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
+    <AuthShell>
       <div className="w-full max-w-sm">
         <div className="flex flex-col gap-6">
           <Card>
@@ -29,6 +30,6 @@ export default function Page() {
           </Card>
         </div>
       </div>
-    </div>
+    </AuthShell>
   );
 }

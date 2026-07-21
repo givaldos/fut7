@@ -23,7 +23,7 @@ export default async function AthleteRegistrationPage({
   const turnstile = getTurnstileConfig();
 
   return (
-    <main className="min-h-svh bg-slate-50 px-4 py-6 sm:py-10">
+    <main className="app-canvas px-4 py-6 sm:py-10">
       <div className="mx-auto max-w-lg">
         <Link
           href={`/t/${slug}`}
@@ -31,11 +31,11 @@ export default async function AthleteRegistrationPage({
         >
           <ArrowLeft className="size-4" aria-hidden /> Voltar para {team.name}
         </Link>
-        <section className="mt-6 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
-          <p className="text-xs font-bold uppercase tracking-[0.18em] text-emerald-700">
+        <section className="app-surface mt-6 p-5 sm:p-8">
+          <p className="app-kicker">
             Cadastro de atleta
           </p>
-          <h1 className="mt-3 text-2xl font-bold tracking-tight text-slate-950">
+          <h1 className="app-title mt-3">
             Entre para o {team.name}
           </h1>
           <p className="mt-2 text-sm leading-6 text-slate-600">

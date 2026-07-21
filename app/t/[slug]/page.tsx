@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { BrandMark } from "@/components/brand-mark";
 import { PublicEventAttendance } from "@/components/public-event-attendance";
 import {
   getPublicAthletes,
@@ -74,12 +75,11 @@ export default async function PublicTeamPage({
   const responseByEvent = new Map((attendance ?? []).map((item) => [item.event_id, item.status]));
 
   return (
-    <main className="min-h-svh bg-slate-50 pb-12">
-      <header className="bg-emerald-950 px-5 pb-16 pt-6 text-white">
-        <div className="mx-auto max-w-3xl">
-          <Link href="/" className="text-sm font-semibold text-emerald-200">
-            FUT7
-          </Link>
+    <main className="app-canvas pb-12">
+      <header className="relative overflow-hidden bg-slate-950 px-5 pb-16 pt-6 text-white">
+        <div className="pointer-events-none absolute -right-24 -top-28 size-72 rounded-full bg-emerald-500/20 blur-3xl" />
+        <div className="relative mx-auto max-w-3xl">
+          <BrandMark className="[&_span:last-child]:text-white" />
           <div className="mt-10 flex items-start gap-4">
             <div className="grid size-16 shrink-0 place-items-center rounded-2xl bg-white/10 text-2xl font-bold">
               {team.name.slice(0, 2).toUpperCase()}
@@ -91,7 +91,7 @@ export default async function PublicTeamPage({
                   Página oficial
                 </span>
               </div>
-              <h1 className="mt-2 text-3xl font-bold tracking-tight">{team.name}</h1>
+              <h1 className="mt-2 text-4xl font-black tracking-[-0.045em]">{team.name}</h1>
               <p className="mt-2 flex items-center gap-2 text-sm text-emerald-100">
                 <MapPin className="size-4" aria-hidden />
                 {team.default_sport_format === "society"
@@ -106,7 +106,7 @@ export default async function PublicTeamPage({
       </header>
 
       <div className="mx-auto -mt-8 max-w-3xl space-y-6 px-4">
-        <section id="agenda" className="scroll-mt-4 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+        <section id="agenda" className="app-surface scroll-mt-4 p-5 sm:p-6">
           <div className="flex items-end justify-between gap-4">
             <div>
               <p className="text-xs font-bold uppercase tracking-wider text-emerald-700">Agenda do time</p>
@@ -126,11 +126,11 @@ export default async function PublicTeamPage({
                 );
                 const timeZone = event.team_timezone || "America/Sao_Paulo";
                 return (
-                  <article key={event.event_id} className="rounded-2xl border border-slate-200 p-4 sm:p-5">
+                  <article key={event.event_id} className="rounded-[1.25rem] border border-slate-200 bg-white p-4 shadow-[0_8px_24px_-20px_rgba(7,35,24,0.4)] sm:p-5">
                     <div className="flex items-start gap-3">
-                      <div className="grid size-12 shrink-0 place-items-center rounded-2xl bg-emerald-50 text-emerald-800">
+                      <div className="grid size-12 shrink-0 place-items-center rounded-2xl bg-slate-950 text-white shadow-sm">
                         <div className="text-center leading-none">
-                          <span className="block text-[10px] font-bold uppercase">
+                          <span className="block text-[10px] font-bold uppercase text-emerald-300">
                             {new Intl.DateTimeFormat("pt-BR", { month: "short", timeZone }).format(new Date(event.starts_at)).replace(".", "")}
                           </span>
                           <span className="mt-1 block text-lg font-black">
@@ -206,7 +206,7 @@ export default async function PublicTeamPage({
           )}
         </section>
 
-        <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+        <section className="app-surface p-5">
           {teamLink?.athlete_status === "active" ? (
             <>
               <div className="flex items-center gap-2 text-emerald-700"><ShieldCheck className="size-5" aria-hidden /><h2 className="text-lg font-semibold text-slate-950">Você faz parte deste time</h2></div>
@@ -229,7 +229,7 @@ export default async function PublicTeamPage({
           </Button>
         </section>
 
-        <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+        <section className="app-surface p-5">
           <div className="flex items-baseline justify-between gap-4">
             <h2 className="text-lg font-semibold text-slate-950">Elenco público</h2>
             <span className="text-sm text-slate-500">{athletes.length} atletas</span>

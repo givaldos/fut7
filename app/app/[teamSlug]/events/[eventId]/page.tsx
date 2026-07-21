@@ -1,5 +1,6 @@
 import { setEventAttendance } from "@/app/app/[teamSlug]/events/actions";
 import { Button } from "@/components/ui/button";
+import { AppContainer } from "@/components/ui/app-shell";
 import { TeamAppHeader } from "@/components/team-app-header";
 import { TeamBottomNav } from "@/components/team-bottom-nav";
 import { requireUser } from "@/lib/auth/dal";
@@ -112,9 +113,9 @@ export default async function EventDetailPage({
     isScheduled && new Date(event.starts_at).valueOf() > new Date().valueOf();
 
   return (
-    <main className="min-h-svh bg-slate-50 pb-24 text-slate-950">
-      <TeamAppHeader currentName={team.name} teams={teams ?? []} />
-      <div className="mx-auto max-w-5xl space-y-6 px-4 py-6 sm:py-10">
+    <main className="app-canvas pb-24">
+      <TeamAppHeader currentName={team.name} currentSlug={team.slug} teams={teams ?? []} />
+      <AppContainer>
         {query.created === "1" && (
           <div className="flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-medium text-emerald-950">
             <BadgeCheck className="size-5 shrink-0" aria-hidden /> Evento criado e chamada aberta para o elenco ativo.
@@ -137,14 +138,14 @@ export default async function EventDetailPage({
           </Link>
           <div className="flex items-center gap-2">
             {isScheduled || event.status === "completed" ? (
-              <Button asChild className="h-11 rounded-xl bg-slate-950 px-3 hover:bg-slate-800">
+              <Button asChild className="bg-slate-950 hover:bg-slate-800">
                 <Link href={`/app/${team.slug}/events/${event.id}/match`}>
                   <NotebookTabs aria-hidden /> Súmula
                 </Link>
               </Button>
             ) : null}
             {isEditable && (
-              <Button asChild variant="outline" className="h-11 rounded-xl bg-white px-3">
+              <Button asChild variant="outline">
                 <Link href={`/app/${team.slug}/events/${event.id}/edit`}>
                   <Pencil aria-hidden /> Editar
                 </Link>
@@ -153,13 +154,14 @@ export default async function EventDetailPage({
           </div>
         </div>
 
-        <section className="rounded-3xl bg-emerald-950 p-6 text-white shadow-sm sm:p-8">
-          <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-emerald-200">
+        <section className="relative overflow-hidden rounded-[2rem] bg-slate-950 p-6 text-white shadow-float sm:p-8">
+          <div className="pointer-events-none absolute -right-20 -top-24 size-64 rounded-full bg-emerald-500/20 blur-3xl" />
+          <div className="relative flex flex-wrap items-center gap-2 text-xs font-semibold text-emerald-200">
             <span>{kindLabels[event.kind]}</span><span>·</span>
             <span>{event.sport_format === "field" ? "Campo" : event.sport_format === "futsal" ? "Futsal" : "Society"}</span><span>·</span>
             <span>{event.organization_mode === "split_teams" ? "Dividir times" : "Time único"}</span>
           </div>
-          <h1 className="mt-3 text-2xl font-bold tracking-tight sm:text-3xl">{event.title}</h1>
+          <h1 className="relative mt-3 text-3xl font-black tracking-[-0.04em] sm:text-4xl">{event.title}</h1>
           {event.opponent_name && <p className="mt-1 text-sm text-emerald-100">vs. {event.opponent_name}</p>}
           <div className="mt-6 grid gap-3 text-sm text-emerald-50 sm:grid-cols-3">
             <p className="flex items-start gap-2"><CalendarDays className="mt-0.5 size-4 shrink-0 text-emerald-300" aria-hidden /> {new Intl.DateTimeFormat("pt-BR", { dateStyle: "full", timeZone: team.timezone }).format(new Date(event.starts_at))}</p>
@@ -175,16 +177,16 @@ export default async function EventDetailPage({
             ["Não vão", counts.declined, "text-red-700"],
             ["Pendentes", counts.pending, "text-slate-600"],
           ].map(([label, value, color]) => (
-            <article key={label as string} className="rounded-2xl border border-slate-200 bg-white p-3 text-center shadow-sm">
-              <p className={`text-xl font-black ${color}`}>{value}</p>
-              <p className="mt-0.5 truncate text-[10px] text-slate-500 sm:text-xs">{label}</p>
+            <article key={label as string} className="app-surface min-w-0 p-3 text-center sm:p-4">
+              <p className={`text-2xl font-black tracking-tight ${color}`}>{value}</p>
+              <p className="mt-0.5 truncate text-[10px] font-semibold text-slate-500 sm:text-xs">{label}</p>
             </article>
           ))}
         </section>
 
         <section>
           <div className="flex items-end justify-between gap-3">
-            <div><h2 className="font-bold">Chamada</h2><p className="mt-1 text-xs text-slate-500">A administração pode registrar a resposta recebida pelo WhatsApp.</p></div>
+            <div><p className="app-kicker">Presença</p><h2 className="mt-1 text-xl font-black tracking-tight">Chamada</h2><p className="mt-1 text-sm text-slate-500">Toque na resposta de cada atleta. Alterações ficam salvas imediatamente.</p></div>
             <span className="shrink-0 rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-600">{call.length} atletas</span>
           </div>
           {call.length ? (
@@ -192,7 +194,7 @@ export default async function EventDetailPage({
               {call.map((athlete) => {
                 const disabled = !isScheduled || athlete.status !== "active";
                 return (
-                  <article key={athlete.id} className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
+                  <article key={athlete.id} className="app-surface p-4">
                     <div className="flex items-center gap-3">
                       <div className="grid size-10 shrink-0 place-items-center rounded-2xl bg-slate-100 text-sm font-bold text-slate-600">{athlete.shirt_number ?? <UsersRound className="size-4" aria-hidden />}</div>
                       <div className="min-w-0 flex-1">
@@ -214,7 +216,7 @@ export default async function EventDetailPage({
                             <input type="hidden" name="eventId" value={event.id} />
                             <input type="hidden" name="athleteId" value={athlete.id} />
                             <input type="hidden" name="status" value={status as string} />
-                            <button type="submit" disabled={disabled} data-active={athlete.response.status === status} aria-label={`${label} — ${athlete.preferred_name || athlete.full_name}`} className={`flex min-h-11 w-full flex-col items-center justify-center rounded-xl border border-slate-200 text-[10px] font-semibold text-slate-500 disabled:cursor-not-allowed disabled:opacity-40 ${activeClass}`}>
+                            <button type="submit" disabled={disabled} data-active={athlete.response.status === status} aria-label={`${label} — ${athlete.preferred_name || athlete.full_name}`} className={`flex min-h-12 w-full touch-manipulation flex-col items-center justify-center rounded-xl border border-slate-200 text-[10px] font-bold text-slate-500 transition active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 ${activeClass}`}>
                               <StatusIcon className="mb-0.5 size-4" aria-hidden /> {label as string}
                             </button>
                           </form>
@@ -226,23 +228,23 @@ export default async function EventDetailPage({
               })}
             </div>
           ) : (
-            <div className="mt-3 rounded-3xl border border-dashed border-slate-300 bg-white p-8 text-center"><UsersRound className="mx-auto size-8 text-slate-400" aria-hidden /><p className="mt-3 font-semibold">Nenhum atleta na chamada</p><Button asChild className="mt-4 h-11 rounded-xl bg-emerald-700 hover:bg-emerald-800"><Link href={`/app/${team.slug}/athletes/new`}>Cadastrar atleta</Link></Button></div>
+            <div className="app-surface mt-3 border-dashed p-8 text-center"><UsersRound className="mx-auto size-8 text-slate-400" aria-hidden /><p className="mt-3 font-semibold">Nenhum atleta na chamada</p><Button asChild className="mt-4"><Link href={`/app/${team.slug}/athletes/new`}>Cadastrar atleta</Link></Button></div>
           )}
         </section>
 
-        <section id="lineup" className="scroll-mt-6 rounded-3xl border border-emerald-200 bg-emerald-50 p-5 sm:p-6">
+        <section id="lineup" className="scroll-mt-6 rounded-[1.5rem] border border-emerald-200 bg-emerald-50 p-5 shadow-soft sm:p-6">
           <div className="flex items-start gap-3">
             <div className="grid size-10 shrink-0 place-items-center rounded-2xl bg-white text-emerald-700"><UserRoundCheck className="size-5" aria-hidden /></div>
             <div className="min-w-0 flex-1">
-              <p className="text-xs font-bold uppercase tracking-wider text-emerald-700">Base da escala</p>
+              <p className="text-xs font-bold uppercase tracking-wider text-emerald-700">Disponíveis na súmula</p>
               <h2 className="mt-1 text-lg font-bold text-emerald-950">{confirmed.length} atletas confirmados</h2>
-              <p className="mt-1 text-sm leading-6 text-emerald-900/80">Somente confirmados entram na base para dividir os times ou montar a escala oficial.</p>
+              <p className="mt-1 text-sm leading-6 text-emerald-900/80">Somente confirmados podem receber gols, assistências ou cartões nesta partida.</p>
             </div>
           </div>
           {confirmed.length > 0 && <div className="mt-4 flex flex-wrap gap-2">{confirmed.map((athlete) => <span key={athlete.id} className="rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-emerald-900 shadow-sm">{athlete.preferred_name || athlete.full_name}</span>)}</div>}
-          <div className="mt-5 flex items-start gap-2 rounded-2xl bg-white/70 p-3 text-xs leading-5 text-emerald-900"><ShieldCheck className="mt-0.5 size-4 shrink-0" aria-hidden /> O editor tático e a divisão equilibrada de times serão o próximo incremento sobre esta lista confirmada.</div>
+          <div className="mt-5 flex items-start gap-2 rounded-2xl bg-white/70 p-3 text-xs leading-5 text-emerald-900"><ShieldCheck className="mt-0.5 size-4 shrink-0" aria-hidden /> A aprovação do vínculo e a confirmação da presença continuam sendo exigidas pelo sistema.</div>
         </section>
-      </div>
+      </AppContainer>
       <TeamBottomNav teamSlug={team.slug} active="events" nextEventId={event.id} />
     </main>
   );

@@ -1,4 +1,5 @@
 import { LiveMatchRefresh } from "@/components/live-match-refresh";
+import { AppContainer } from "@/components/ui/app-shell";
 import { requireUser } from "@/lib/auth/dal";
 import { createClient } from "@/lib/supabase/server";
 import {
@@ -104,7 +105,7 @@ export default async function PlayerMatchPage({
   const live = started && !finalized && event.status === "scheduled";
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6 px-4 py-6 sm:py-10">
+    <AppContainer narrow>
       <LiveMatchRefresh active={live} />
       <div className="flex items-center justify-between gap-3">
         <Link
@@ -124,8 +125,9 @@ export default async function PlayerMatchPage({
         ) : null}
       </div>
 
-      <section className="overflow-hidden rounded-3xl bg-slate-950 text-white shadow-sm">
-        <div className="p-6 sm:p-8">
+      <section className="relative overflow-hidden rounded-[2rem] bg-slate-950 text-white shadow-float">
+        <div className="pointer-events-none absolute -right-20 -top-24 size-64 rounded-full bg-emerald-500/20 blur-3xl" />
+        <div className="relative p-6 sm:p-8">
           <p className="text-xs font-bold uppercase tracking-wider text-emerald-300">
             {teamLink.team_name} · {kindLabels[event.kind]}
           </p>
@@ -203,7 +205,7 @@ export default async function PlayerMatchPage({
               return (
                 <article
                   key={incident.id}
-                  className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"
+                  className="app-surface flex items-center gap-3 p-4"
                 >
                   <div
                     className={`grid size-10 shrink-0 place-items-center rounded-2xl ${iconColor}`}
@@ -237,7 +239,7 @@ export default async function PlayerMatchPage({
             })}
           </div>
         ) : (
-          <div className="mt-3 rounded-3xl border border-dashed border-slate-300 bg-white p-8 text-center">
+          <div className="app-surface mt-3 border-dashed p-8 text-center">
             <Trophy className="mx-auto size-8 text-slate-400" aria-hidden />
             <p className="mt-3 font-semibold">
               {started ? "Nenhum lance registrado" : "A partida ainda não começou"}
@@ -250,13 +252,13 @@ export default async function PlayerMatchPage({
       </section>
 
       {report?.notes && (
-        <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+        <section className="app-surface p-5">
           <h2 className="font-bold">Resumo da partida</h2>
           <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-slate-600">
             {report.notes}
           </p>
         </section>
       )}
-    </div>
+    </AppContainer>
   );
 }

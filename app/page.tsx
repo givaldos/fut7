@@ -1,11 +1,12 @@
 import { Button } from "@/components/ui/button";
+import { BrandMark } from "@/components/brand-mark";
 import { getSessionDestination } from "@/lib/auth/dal";
 import {
   ArrowRight,
   BellRing,
   CalendarDays,
   CheckCircle2,
-  ClipboardList,
+  NotebookTabs,
   ShieldCheck,
   Smartphone,
   UsersRound,
@@ -18,13 +19,11 @@ export default async function Home() {
   if (sessionDestination) redirect(sessionDestination);
 
   return (
-    <main className="min-h-svh overflow-hidden bg-[#f7faf8] text-slate-950">
-      <div className="relative bg-emerald-950 text-white">
+    <main className="app-canvas overflow-hidden">
+      <div className="relative bg-slate-950 text-white">
         <div className="absolute inset-0 opacity-20 [background-image:radial-gradient(circle_at_80%_15%,#34d399_0,transparent_32%),radial-gradient(circle_at_5%_85%,#10b981_0,transparent_28%)]" />
         <nav className="relative mx-auto flex h-16 max-w-6xl items-center justify-between px-5">
-          <Link href="/" className="text-lg font-black tracking-[0.16em]">
-            FUT7
-          </Link>
+          <BrandMark className="[&_span:last-child]:text-white" />
           <Button
             asChild
             variant="outline"
@@ -41,10 +40,10 @@ export default async function Home() {
               <Smartphone className="size-3.5" aria-hidden /> Feito primeiro para o celular
             </div>
             <h1 className="mt-6 max-w-2xl text-4xl font-bold leading-[1.04] tracking-[-0.04em] sm:text-5xl md:text-6xl">
-              Do “quem vai?” ao time escalado.
+              Do “quem vai?” ao jogo organizado.
             </h1>
             <p className="mt-5 max-w-xl text-base leading-7 text-emerald-100 sm:text-lg">
-              Atletas, agenda, presença e divisão do racha sem planilhas nem
+              BID, agenda, presença e súmula do racha sem planilhas nem
               mensagens perdidas no grupo.
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
@@ -58,7 +57,7 @@ export default async function Home() {
                 </Link>
               </Button>
               <span className="self-center text-xs text-emerald-200">
-                MVP em construção · base segura pronta
+                Mobile-first · preparado para WhatsApp
               </span>
             </div>
           </div>
@@ -118,7 +117,7 @@ export default async function Home() {
             [UsersRound, "BID do time", "Cadastro aprovado, número, camisa e posições preferidas por modalidade."],
             [CalendarDays, "Agenda flexível", "Eventos recorrentes e jogos avulsos: racha, amistoso ou campeonato."],
             [CheckCircle2, "Presença rápida", "Confirmação simples, preparada para começar no web e chegar ao WhatsApp."],
-            [ClipboardList, "Escalação", "Monte elenco, titulares, reservas e posição de cada atleta confirmado."],
+            [NotebookTabs, "Súmula do racha", "Registre placar, gols, assistências e cartões usando apenas atletas confirmados."],
             [BellRing, "WhatsApp-first", "Consentimento e fila de notificações já fazem parte do modelo de dados."],
             [ShieldCheck, "Multi-time seguro", "Troca de time sem misturar dados, com isolamento RLS e trilha de auditoria."],
           ].map(([Icon, title, description]) => {
@@ -126,7 +125,7 @@ export default async function Home() {
             return (
               <article
                 key={title as string}
-                className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"
+                className="app-surface app-interactive p-6"
               >
                 <div className="grid size-11 place-items-center rounded-2xl bg-emerald-50 text-emerald-800">
                   <FeatureIcon className="size-5" aria-hidden />

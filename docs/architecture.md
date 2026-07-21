@@ -35,6 +35,14 @@ flowchart LR
 
 O navegador usa apenas a chave publicável. Operações comuns são autorizadas no PostgreSQL por RLS. A chave secreta que ignora RLS existe somente no servidor e está limitada a RPCs estreitas: cadastro público previamente validado com Turnstile e prévia não sensível de um convite por token.
 
+## Design system e experiência mobile
+
+- Tailwind concentra os tokens semânticos de cor, raio, sombra, foco e movimento; Radix permanece restrito aos controles que precisam de comportamento acessível.
+- `components/ui` fornece as primitivas de ação, campo, superfície, cabeçalho, métrica e contêiner usadas pelos fluxos públicos, administrativos e do atleta.
+- controles interativos têm alvo mínimo de 44 px, estados de foco visíveis, feedback de toque e respeito a `prefers-reduced-motion`;
+- no celular, as áreas autenticadas usam navegação inferior flutuante e priorizam a próxima ação; no desktop, a mesma arquitetura vira navegação horizontal;
+- verde indica ação ou sucesso, enquanto a hierarquia principal usa superfícies neutras e alto contraste para não confundir marca com estado.
+
 ## Tenancy e papéis
 
 - `owner`: controle total do time; o último owner não pode ser removido.

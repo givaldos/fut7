@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { AppContainer, Metric } from "@/components/ui/app-shell";
 import { requireUser } from "@/lib/auth/dal";
 import { createClient } from "@/lib/supabase/server";
 import {
@@ -110,30 +111,30 @@ export default async function PlayerPortalPage({
     value: number;
     label: string;
     icon: typeof CalendarDays;
-    color: string;
+    tone: "emerald" | "amber" | "sky";
   }[] = [
     {
       value: events?.length ?? 0,
       label: "Próximos",
       icon: CalendarDays,
-      color: "text-emerald-700",
+      tone: "emerald",
     },
     {
       value: pendingEvents.length,
       label: "Para responder",
       icon: Clock3,
-      color: "text-amber-700",
+      tone: "amber",
     },
     {
       value: activeLinks.length,
       label: "Times ativos",
       icon: UsersRound,
-      color: "text-sky-700",
+      tone: "sky",
     },
   ];
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6 px-4 py-6 sm:py-10">
+    <AppContainer>
       {query.registered === "1" && (
         <div className="flex items-start gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-950">
           <BadgeCheck className="mt-0.5 size-5 shrink-0" aria-hidden />
@@ -145,13 +146,14 @@ export default async function PlayerPortalPage({
         </div>
       )}
 
-      <section className="overflow-hidden rounded-3xl bg-emerald-950 text-white shadow-sm">
-        <div className="grid gap-6 p-6 sm:grid-cols-[1fr_auto] sm:items-end sm:p-8">
+      <section className="relative overflow-hidden rounded-[2rem] bg-slate-950 text-white shadow-float">
+        <div className="pointer-events-none absolute -right-16 -top-20 size-64 rounded-full bg-emerald-500/25 blur-3xl" />
+        <div className="relative grid gap-6 p-6 sm:grid-cols-[1fr_auto] sm:items-end sm:p-8">
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.16em] text-emerald-300">
               Seu futebol
             </p>
-            <h1 className="mt-2 text-3xl font-black tracking-tight sm:text-4xl">
+            <h1 className="mt-2 text-4xl font-black tracking-[-0.045em] sm:text-5xl">
               Olá, {firstName}
             </h1>
             <p className="mt-3 max-w-xl text-sm leading-6 text-emerald-100">
@@ -173,26 +175,9 @@ export default async function PlayerPortalPage({
       </section>
 
       <section aria-label="Resumo" className="grid grid-cols-3 gap-2 sm:gap-3">
-        {summaries.map((summary) => {
-          const SummaryIcon = summary.icon;
-          return (
-            <article
-              key={summary.label}
-              className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm sm:p-4"
-            >
-              <SummaryIcon
-                className={`size-4 ${summary.color}`}
-                aria-hidden
-              />
-              <p className="mt-2 text-2xl font-black tracking-tight">
-                {summary.value}
-              </p>
-              <p className="mt-0.5 text-[10px] leading-4 text-slate-500 sm:text-xs">
-                {summary.label}
-              </p>
-            </article>
-          );
-        })}
+        {summaries.map((summary) => (
+          <Metric key={summary.label} {...summary} />
+        ))}
       </section>
 
       <section>
@@ -213,7 +198,7 @@ export default async function PlayerPortalPage({
 
         {nextActionEvent ? (
           <article
-            className={`mt-3 rounded-3xl border p-5 shadow-sm sm:p-6 ${
+            className={`mt-3 rounded-[1.5rem] border p-5 shadow-soft sm:p-6 ${
               pendingEvents.length
                 ? "border-amber-200 bg-amber-50"
                 : "border-emerald-200 bg-emerald-50"
@@ -264,7 +249,7 @@ export default async function PlayerPortalPage({
             </div>
           </article>
         ) : (
-          <div className="mt-3 rounded-3xl border border-dashed border-slate-300 bg-white p-7 text-center">
+          <div className="app-surface mt-3 border-dashed p-7 text-center">
             <CalendarDays className="mx-auto size-8 text-slate-400" aria-hidden />
             <p className="mt-3 font-semibold">Nenhum jogo aberto para você</p>
             <p className="mt-1 text-sm text-slate-500">
@@ -275,7 +260,7 @@ export default async function PlayerPortalPage({
       </section>
 
       <section className="grid gap-3 sm:grid-cols-2">
-        <article className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+        <article className="app-surface p-5">
           <div className="flex items-start justify-between gap-3">
             <div className="grid size-11 place-items-center rounded-2xl bg-violet-50 text-violet-700">
               <UserRound className="size-5" aria-hidden />
@@ -313,7 +298,7 @@ export default async function PlayerPortalPage({
           </div>
         </article>
 
-        <article className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+        <article className="app-surface p-5">
           <div className="flex items-center justify-between gap-3">
             <div>
               <p className="text-xs font-bold uppercase tracking-wider text-emerald-700">
@@ -363,6 +348,6 @@ export default async function PlayerPortalPage({
           )}
         </article>
       </section>
-    </div>
+    </AppContainer>
   );
 }
