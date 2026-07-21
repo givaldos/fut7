@@ -137,6 +137,8 @@ export type Database = {
           public_profile: boolean
           registration_number: number
           registration_source: Database["public"]["Enums"]["registration_source"]
+          removed_at: string | null
+          removed_by: string | null
           shirt_number: number | null
           status: Database["public"]["Enums"]["athlete_status"]
           team_id: string
@@ -156,6 +158,8 @@ export type Database = {
           public_profile?: boolean
           registration_number?: never
           registration_source?: Database["public"]["Enums"]["registration_source"]
+          removed_at?: string | null
+          removed_by?: string | null
           shirt_number?: number | null
           status?: Database["public"]["Enums"]["athlete_status"]
           team_id: string
@@ -175,6 +179,8 @@ export type Database = {
           public_profile?: boolean
           registration_number?: never
           registration_source?: Database["public"]["Enums"]["registration_source"]
+          removed_at?: string | null
+          removed_by?: string | null
           shirt_number?: number | null
           status?: Database["public"]["Enums"]["athlete_status"]
           team_id?: string
@@ -990,6 +996,53 @@ export type Database = {
           },
         ]
       }
+      team_media: {
+        Row: {
+          alt_text: string | null
+          created_at: string
+          created_by: string
+          id: string
+          is_featured: boolean
+          kind: string
+          sort_order: number
+          storage_path: string
+          team_id: string
+          updated_at: string
+        }
+        Insert: {
+          alt_text?: string | null
+          created_at?: string
+          created_by: string
+          id?: string
+          is_featured?: boolean
+          kind: string
+          sort_order?: number
+          storage_path: string
+          team_id: string
+          updated_at?: string
+        }
+        Update: {
+          alt_text?: string | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          is_featured?: boolean
+          kind?: string
+          sort_order?: number
+          storage_path?: string
+          team_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_media_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       team_memberships: {
         Row: {
           created_at: string
@@ -1023,6 +1076,50 @@ export type Database = {
             foreignKeyName: "team_memberships_team_id_fkey"
             columns: ["team_id"]
             isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      team_public_profiles: {
+        Row: {
+          about: string | null
+          created_at: string
+          facebook_url: string | null
+          instagram_url: string | null
+          team_id: string
+          tiktok_url: string | null
+          updated_at: string
+          website_url: string | null
+          youtube_url: string | null
+        }
+        Insert: {
+          about?: string | null
+          created_at?: string
+          facebook_url?: string | null
+          instagram_url?: string | null
+          team_id: string
+          tiktok_url?: string | null
+          updated_at?: string
+          website_url?: string | null
+          youtube_url?: string | null
+        }
+        Update: {
+          about?: string | null
+          created_at?: string
+          facebook_url?: string | null
+          instagram_url?: string | null
+          team_id?: string
+          tiktok_url?: string | null
+          updated_at?: string
+          website_url?: string | null
+          youtube_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_public_profiles_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: true
             referencedRelation: "teams"
             referencedColumns: ["id"]
           },
@@ -1108,6 +1205,7 @@ export type Database = {
         Row: {
           display_name: string | null
           photo_path: string | null
+          player_handle: string | null
           positions: Json | null
           registration_number: number | null
           shirt_number: number | null
@@ -1128,28 +1226,31 @@ export type Database = {
       }
       public_team_directory: {
         Row: {
+          about: string | null
+          cover_path: string | null
           default_sport_format:
             | Database["public"]["Enums"]["sport_format"]
             | null
+          facebook_url: string | null
+          instagram_url: string | null
           logo_path: string | null
           name: string | null
           slug: string | null
+          tiktok_url: string | null
+          website_url: string | null
+          youtube_url: string | null
         }
-        Insert: {
-          default_sport_format?:
-            | Database["public"]["Enums"]["sport_format"]
-            | null
-          logo_path?: string | null
-          name?: string | null
-          slug?: never
-        }
-        Update: {
-          default_sport_format?:
-            | Database["public"]["Enums"]["sport_format"]
-            | null
-          logo_path?: string | null
-          name?: string | null
-          slug?: never
+        Relationships: []
+      }
+      public_team_media: {
+        Row: {
+          alt_text: string | null
+          created_at: string | null
+          id: string | null
+          is_featured: boolean | null
+          sort_order: number | null
+          storage_path: string | null
+          team_slug: string | null
         }
         Relationships: []
       }
@@ -1179,6 +1280,14 @@ export type Database = {
           incident_notes?: string
           incident_scoring_side?: number
           requested_event_id: string
+        }
+        Returns: string
+      }
+      add_team_gallery_media: {
+        Args: {
+          requested_alt_text?: string
+          requested_storage_path: string
+          requested_team_id: string
         }
         Returns: string
       }
@@ -1224,24 +1333,6 @@ export type Database = {
           requested_team_id: string
         }
         Returns: string
-      }
-      update_event_as_staff: {
-        Args: {
-          attendance_deadline_minutes: number
-          edit_scope: string
-          event_duration_minutes: number
-          event_kind: Database["public"]["Enums"]["event_kind"]
-          event_opponent_name?: string
-          event_organization_mode: Database["public"]["Enums"]["organization_mode"]
-          event_sport_format: Database["public"]["Enums"]["sport_format"]
-          event_starts_at: string
-          event_title: string
-          event_venue_address?: string
-          event_venue_name?: string
-          requested_event_id: string
-          requested_team_id: string
-        }
-        Returns: number
       }
       create_team_for_current_user: {
         Args: {
@@ -1321,6 +1412,31 @@ export type Database = {
           team_slug: string
         }[]
       }
+      remove_athlete_from_team: {
+        Args: { requested_athlete_id: string }
+        Returns: {
+          removal_outcome: string
+          removed_photo_path: string
+        }[]
+      }
+      remove_my_player_photo: { Args: never; Returns: string }
+      remove_team_media: {
+        Args: { requested_media_id: string }
+        Returns: string
+      }
+      replace_my_player_photo: {
+        Args: { requested_storage_path: string }
+        Returns: string
+      }
+      replace_team_identity_media: {
+        Args: {
+          requested_alt_text?: string
+          requested_kind: string
+          requested_storage_path: string
+          requested_team_id: string
+        }
+        Returns: string
+      }
       respond_to_event_as_player: {
         Args: {
           requested_event_id: string
@@ -1331,6 +1447,14 @@ export type Database = {
       respond_to_team_invitation: {
         Args: { invitation_response: string; requested_invitation_id: string }
         Returns: string
+      }
+      review_athlete_registration: {
+        Args: { decision: string; requested_athlete_id: string }
+        Returns: Database["public"]["Enums"]["athlete_status"]
+      }
+      revoke_team_invitation: {
+        Args: { requested_invitation_id: string }
+        Returns: boolean
       }
       save_match_report_as_staff: {
         Args: {
@@ -1343,14 +1467,6 @@ export type Database = {
           should_finalize?: boolean
         }
         Returns: string
-      }
-      review_athlete_registration: {
-        Args: { decision: string; requested_athlete_id: string }
-        Returns: Database["public"]["Enums"]["athlete_status"]
-      }
-      revoke_team_invitation: {
-        Args: { requested_invitation_id: string }
-        Returns: boolean
       }
       set_athlete_availability: {
         Args: {
@@ -1367,6 +1483,10 @@ export type Database = {
         }
         Returns: Database["public"]["Enums"]["attendance_status"]
       }
+      set_team_featured_media: {
+        Args: { requested_media_id: string }
+        Returns: boolean
+      }
       submit_athlete_registration: {
         Args: {
           accepts_privacy_terms?: boolean
@@ -1380,6 +1500,39 @@ export type Database = {
         }
         Returns: boolean
       }
+      update_athlete_as_admin: {
+        Args: {
+          athlete_birth_date?: string
+          athlete_email?: string
+          athlete_full_name?: string
+          athlete_phone_e164?: string
+          athlete_preferred_name?: string
+          athlete_public_profile?: boolean
+          athlete_shirt_number?: number
+          position_codes?: string[]
+          requested_athlete_id: string
+          team_notes?: string
+        }
+        Returns: boolean
+      }
+      update_event_as_staff: {
+        Args: {
+          attendance_deadline_minutes: number
+          edit_scope: string
+          event_duration_minutes: number
+          event_kind: Database["public"]["Enums"]["event_kind"]
+          event_opponent_name?: string
+          event_organization_mode: Database["public"]["Enums"]["organization_mode"]
+          event_sport_format: Database["public"]["Enums"]["sport_format"]
+          event_starts_at: string
+          event_title: string
+          event_venue_address?: string
+          event_venue_name?: string
+          requested_event_id: string
+          requested_team_id: string
+        }
+        Returns: number
+      }
       update_my_player_profile: {
         Args: {
           field_positions: string[]
@@ -1392,6 +1545,23 @@ export type Database = {
           society_positions: string[]
         }
         Returns: string
+      }
+      update_team_social_settings: {
+        Args: {
+          requested_about: string
+          requested_facebook_url: string
+          requested_instagram_url: string
+          requested_is_public: boolean
+          requested_name: string
+          requested_slug: string
+          requested_sport_format: Database["public"]["Enums"]["sport_format"]
+          requested_team_id: string
+          requested_tiktok_url: string
+          requested_timezone: string
+          requested_website_url: string
+          requested_youtube_url: string
+        }
+        Returns: boolean
       }
     }
     Enums: {
@@ -1413,10 +1583,10 @@ export type Database = {
         | "other"
       event_status: "scheduled" | "cancelled" | "completed"
       lineup_slot_kind: "starter" | "substitute"
+      match_incident_kind: "goal" | "yellow_card" | "red_card"
       membership_status: "invited" | "active" | "suspended"
       message_channel: "whatsapp" | "email" | "push"
       message_status: "pending" | "processing" | "sent" | "failed" | "cancelled"
-      match_incident_kind: "goal" | "yellow_card" | "red_card"
       organization_mode: "single_squad" | "split_teams"
       registration_source: "admin" | "public_form" | "import"
       sport_format: "field" | "society" | "futsal"
@@ -1577,10 +1747,10 @@ export const Constants = {
       ],
       event_status: ["scheduled", "cancelled", "completed"],
       lineup_slot_kind: ["starter", "substitute"],
+      match_incident_kind: ["goal", "yellow_card", "red_card"],
       membership_status: ["invited", "active", "suspended"],
       message_channel: ["whatsapp", "email", "push"],
       message_status: ["pending", "processing", "sent", "failed", "cancelled"],
-      match_incident_kind: ["goal", "yellow_card", "red_card"],
       organization_mode: ["single_squad", "split_teams"],
       registration_source: ["admin", "public_form", "import"],
       sport_format: ["field", "society", "futsal"],

@@ -7,7 +7,17 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Eye, LoaderCircle, Save, ShieldCheck } from "lucide-react";
+import {
+  Eye,
+  Facebook,
+  Globe2,
+  Instagram,
+  LoaderCircle,
+  Music2,
+  Save,
+  ShieldCheck,
+  Youtube,
+} from "lucide-react";
 import { useActionState } from "react";
 
 const initialState: UpdateTeamState = {};
@@ -22,6 +32,12 @@ export function TeamSettingsForm({
     defaultSportFormat: "field" | "society" | "futsal";
     timezone: string;
     isPublic: boolean;
+    about: string;
+    instagramUrl: string;
+    facebookUrl: string;
+    youtubeUrl: string;
+    tiktokUrl: string;
+    websiteUrl: string;
   };
 }) {
   const [state, formAction, pending] = useActionState(updateTeam, initialState);
@@ -50,6 +66,91 @@ export function TeamSettingsForm({
           </p>
         ) : null}
       </div>
+
+      <div className="space-y-2">
+        <div className="flex items-baseline justify-between gap-3">
+          <Label htmlFor="team-about">Sobre o time</Label>
+          <span className="text-[11px] text-slate-400">até 1.600 caracteres</span>
+        </div>
+        <textarea
+          id="team-about"
+          name="about"
+          defaultValue={team.about}
+          rows={5}
+          maxLength={1600}
+          placeholder="Conte como o time nasceu, quando vocês jogam e o que torna essa resenha especial."
+          className="w-full resize-y px-3 py-3 text-sm leading-6"
+          aria-invalid={Boolean(state.errors?.about)}
+        />
+        {state.errors?.about ? (
+          <p className="text-sm text-red-700">O texto sobre o time está muito longo.</p>
+        ) : null}
+      </div>
+
+      <fieldset className="space-y-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+        <div>
+          <legend className="font-black text-slate-950">Redes sociais</legend>
+          <p className="mt-1 text-xs leading-5 text-slate-500">
+            Você pode informar o @usuário ou colar o link completo.
+          </p>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <SocialField
+            id="instagramUrl"
+            label="Instagram"
+            icon={Instagram}
+            defaultValue={team.instagramUrl}
+            placeholder="@meutime"
+            invalid={Boolean(state.errors?.instagramUrl)}
+          />
+          <SocialField
+            id="facebookUrl"
+            label="Facebook"
+            icon={Facebook}
+            defaultValue={team.facebookUrl}
+            placeholder="facebook.com/meutime"
+            invalid={Boolean(state.errors?.facebookUrl)}
+          />
+          <SocialField
+            id="youtubeUrl"
+            label="YouTube"
+            icon={Youtube}
+            defaultValue={team.youtubeUrl}
+            placeholder="@meutime"
+            invalid={Boolean(state.errors?.youtubeUrl)}
+          />
+          <SocialField
+            id="tiktokUrl"
+            label="TikTok"
+            icon={Music2}
+            defaultValue={team.tiktokUrl}
+            placeholder="@meutime"
+            invalid={Boolean(state.errors?.tiktokUrl)}
+          />
+          <div className="sm:col-span-2">
+            <SocialField
+              id="websiteUrl"
+              label="Site"
+              icon={Globe2}
+              defaultValue={team.websiteUrl}
+              placeholder="meutime.com.br"
+              invalid={Boolean(state.errors?.websiteUrl)}
+            />
+          </div>
+        </div>
+        {state.errors &&
+        [
+          state.errors.instagramUrl,
+          state.errors.facebookUrl,
+          state.errors.youtubeUrl,
+          state.errors.tiktokUrl,
+          state.errors.websiteUrl,
+        ].some(Boolean) ? (
+          <p className="text-sm text-red-700">
+            Revise os links. Aceitamos somente endereços HTTPS da rede indicada.
+          </p>
+        ) : null}
+      </fieldset>
 
       <fieldset className="space-y-3">
         <legend className="text-sm font-medium text-slate-900">Modalidade principal</legend>
@@ -129,5 +230,40 @@ export function TeamSettingsForm({
         {pending ? "Salvando..." : "Salvar alterações"}
       </Button>
     </form>
+  );
+}
+
+function SocialField({
+  id,
+  label,
+  icon: Icon,
+  defaultValue,
+  placeholder,
+  invalid,
+}: {
+  id: string;
+  label: string;
+  icon: typeof Instagram;
+  defaultValue: string;
+  placeholder: string;
+  invalid: boolean;
+}) {
+  return (
+    <div className="space-y-2">
+      <Label htmlFor={id} className="flex items-center gap-2">
+        <Icon className="size-4 text-slate-500" aria-hidden /> {label}
+      </Label>
+      <Input
+        id={id}
+        name={id}
+        defaultValue={defaultValue}
+        placeholder={placeholder}
+        maxLength={300}
+        autoCapitalize="none"
+        autoCorrect="off"
+        spellCheck={false}
+        aria-invalid={invalid}
+      />
+    </div>
   );
 }

@@ -2,6 +2,7 @@ import {
   reviewAthlete,
   setAthleteAvailability,
 } from "@/app/app/[teamSlug]/athletes/actions";
+import { AthleteRemoveButton } from "@/components/athlete-remove-button";
 import { Button } from "@/components/ui/button";
 import { AppContainer, PageHeader } from "@/components/ui/app-shell";
 import { TeamAppHeader } from "@/components/team-app-header";
@@ -13,6 +14,8 @@ import {
   Ban,
   Check,
   Clock3,
+  Edit3,
+  History,
   Mail,
   Phone,
   Plus,
@@ -35,7 +38,13 @@ export default async function AthletesPage({
   searchParams,
 }: {
   params: Promise<{ teamSlug: string }>;
-  searchParams: Promise<{ created?: string }>;
+  searchParams: Promise<{
+    created?: string;
+    updated?: string;
+    removed?: string;
+    removeError?: string;
+    view?: string;
+  }>;
 }) {
   const user = await requireUser();
   const { teamSlug } = await params;
@@ -57,7 +66,7 @@ export default async function AthletesPage({
       .maybeSingle(),
     supabase
       .from("athletes")
-      .select("id, user_id, registration_number, full_name, preferred_name, shirt_number, status, registration_source, created_at")
+      .select("id, user_id, registration_number, full_name, preferred_name, shirt_number, status, registration_source, created_at, removed_at")
       .eq("team_id", team.id)
       .order("created_at", { ascending: false }),
     supabase
@@ -96,8 +105,21 @@ export default async function AthletesPage({
     ]);
   }
 
-  const pending = (athletes ?? []).filter((athlete) => athlete.status === "pending");
-  const roster = (athletes ?? []).filter((athlete) => athlete.status !== "pending");
+  const currentAthletes = (athletes ?? []).filter(
+    (athlete) => !athlete.removed_at,
+  );
+  const removedAthletes = (athletes ?? []).filter(
+    (athlete) => Boolean(athlete.removed_at),
+  );
+  const pending = currentAthletes.filter(
+    (athlete) => athlete.status === "pending",
+  );
+  const roster = currentAthletes.filter(
+    (athlete) => athlete.status !== "pending",
+  );
+  const canManageRelationship =
+    membership.role === "owner" || membership.role === "admin";
+  const showingRemoved = query.view === "removed";
 
   return (
     <main className="app-canvas pb-24">
@@ -109,10 +131,33 @@ export default async function AthletesPage({
           </div>
         )}
 
+        {query.updated === "1" && (
+          <div className="flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-medium text-emerald-950">
+            <BadgeCheck className="size-5 shrink-0" aria-hidden /> Dados do
+            atleta atualizados.
+          </div>
+        )}
+
+        {(query.removed === "archived" || query.removed === "deleted") && (
+          <div className="flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-medium text-emerald-950">
+            <BadgeCheck className="size-5 shrink-0" aria-hidden />
+            {query.removed === "archived"
+              ? "Vínculo removido. O histórico esportivo foi preservado e os dados privados foram eliminados."
+              : "Atleta removido definitivamente porque ainda não possuía histórico esportivo."}
+          </div>
+        )}
+
+        {query.removeError === "1" && (
+          <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-medium text-red-800">
+            Não foi possível remover este vínculo. Atualize a página e tente
+            novamente.
+          </div>
+        )}
+
         <PageHeader
           eyebrow="BID do time"
           title="Atletas"
-          description={`${athletes?.length ?? 0} cadastros · ${pending.length} aguardando análise`}
+          description={`${currentAthletes.length} cadastros atuais · ${pending.length} aguardando análise`}
           action={
             <Button asChild>
               <Link href={`/app/${team.slug}/athletes/new`}>
@@ -122,7 +167,30 @@ export default async function AthletesPage({
           }
         />
 
-        {pending.length > 0 && (
+        <nav
+          aria-label="Visualização do elenco"
+          className="flex rounded-2xl bg-slate-100 p-1"
+        >
+          <Link
+            href={`/app/${team.slug}/athletes`}
+            className={`flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl px-3 text-sm font-bold transition ${!showingRemoved ? "bg-white text-emerald-800 shadow-sm" : "text-slate-600 hover:text-slate-900"}`}
+          >
+            <UserRound className="size-4" aria-hidden /> Elenco
+          </Link>
+          <Link
+            href={`/app/${team.slug}/athletes?view=removed`}
+            className={`flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl px-3 text-sm font-bold transition ${showingRemoved ? "bg-white text-emerald-800 shadow-sm" : "text-slate-600 hover:text-slate-900"}`}
+          >
+            <History className="size-4" aria-hidden /> Removidos
+            {removedAthletes.length ? (
+              <span className="rounded-full bg-slate-200 px-2 py-0.5 text-[10px] text-slate-700">
+                {removedAthletes.length}
+              </span>
+            ) : null}
+          </Link>
+        </nav>
+
+        {!showingRemoved && pending.length > 0 && (
           <section>
             <div className="flex items-center gap-2">
               <ShieldQuestion className="size-5 text-amber-600" aria-hidden />
@@ -170,7 +238,7 @@ export default async function AthletesPage({
           </section>
         )}
 
-        <section>
+        {!showingRemoved ? <section>
           <p className="app-kicker">Disponibilidade</p>
           <h2 className="mt-1 text-xl font-black tracking-tight">Elenco</h2>
           {roster.length ? (
@@ -198,6 +266,23 @@ export default async function AthletesPage({
                     {positions.length > 0 && <div className="mt-4 flex flex-wrap gap-1.5">{positions.map((position, index) => <span key={position} className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">{index + 1}. {position}</span>)}</div>}
                     {(contact?.phone_e164 || contact?.email) && <div className="mt-4 space-y-1 border-t border-slate-100 pt-3 text-xs text-slate-500">{contact.phone_e164 && <p>{contact.phone_e164}</p>}{contact.email && <p className="truncate">{contact.email}</p>}</div>}
 
+                    {canManageRelationship ? (
+                      <div className="mt-4 grid grid-cols-2 gap-2 border-t border-slate-100 pt-4">
+                        <Button asChild size="sm" variant="outline" className="h-10 rounded-xl">
+                          <Link href={`/app/${team.slug}/athletes/${athlete.id}/edit`}>
+                            <Edit3 aria-hidden /> Editar
+                          </Link>
+                        </Button>
+                        <AthleteRemoveButton
+                          athleteId={athlete.id}
+                          athleteName={
+                            athlete.preferred_name || athlete.full_name
+                          }
+                          teamSlug={team.slug}
+                        />
+                      </div>
+                    ) : null}
+
                     {canToggle && (
                       <form action={setAthleteAvailability} className="mt-4">
                         <input type="hidden" name="athleteId" value={athlete.id} />
@@ -219,7 +304,60 @@ export default async function AthletesPage({
               <p className="mt-1 text-sm text-slate-500">Cadastre diretamente ou aprove os pedidos recebidos.</p>
             </div>
           )}
-        </section>
+        </section> : (
+          <section>
+            <p className="app-kicker">Histórico preservado</p>
+            <h2 className="mt-1 text-xl font-black tracking-tight">
+              Atletas removidos
+            </h2>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
+              Estes vínculos tinham participação em partidas. Contato,
+              nascimento, posições atuais e chamadas futuras já foram
+              removidos; nome esportivo, camisa e fatos da partida permanecem
+              para manter as súmulas corretas.
+            </p>
+            {removedAthletes.length ? (
+              <div className="mt-4 grid gap-3 md:grid-cols-2">
+                {removedAthletes.map((athlete) => (
+                  <article key={athlete.id} className="app-surface p-5 opacity-80">
+                    <div className="flex items-start gap-3">
+                      <div className="grid size-11 shrink-0 place-items-center rounded-2xl bg-slate-100 text-slate-500">
+                        {athlete.shirt_number ?? (
+                          <History className="size-5" aria-hidden />
+                        )}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center justify-between gap-2">
+                          <h3 className="truncate font-bold">
+                            {athlete.preferred_name || athlete.full_name}
+                          </h3>
+                          <span className="rounded-full bg-slate-100 px-2 py-1 text-[10px] font-bold uppercase text-slate-600">
+                            Removido
+                          </span>
+                        </div>
+                        <p className="mt-1 text-xs text-slate-500">
+                          BID #{athlete.registration_number} · removido em{" "}
+                          {new Intl.DateTimeFormat("pt-BR").format(
+                            new Date(athlete.removed_at!),
+                          )}
+                        </p>
+                      </div>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <div className="app-surface mt-4 border-dashed p-8 text-center">
+                <History className="mx-auto size-8 text-slate-400" aria-hidden />
+                <p className="mt-3 font-semibold">Nenhum vínculo arquivado</p>
+                <p className="mt-1 text-sm text-slate-500">
+                  Atletas sem histórico são excluídos definitivamente e não
+                  aparecem aqui.
+                </p>
+              </div>
+            )}
+          </section>
+        )}
       </AppContainer>
       <TeamBottomNav teamSlug={team.slug} active="athletes" nextEventId={nextEvent?.id} />
     </main>

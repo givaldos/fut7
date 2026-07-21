@@ -78,6 +78,49 @@ export const athleteAvailabilitySchema = z.object({
   status: z.enum(["active", "inactive"]),
 });
 
+const athleteTeamFields = {
+  athleteId: z.string().uuid(),
+  teamSlug: z.string().regex(TEAM_SLUG_PATTERN),
+  shirtNumber: optionalInteger(1, 99),
+  notes: z.preprocess(
+    (value) =>
+      typeof value === "string" && value.trim() === "" ? undefined : value,
+    z.string().trim().max(2_000).optional(),
+  ),
+};
+
+export const updateAthleteSchema = z.discriminatedUnion("profileOwner", [
+  z.object({
+    ...athleteTeamFields,
+    profileOwner: z.literal("team"),
+    fullName: z.string().trim().min(2).max(120),
+    preferredName: optionalText(60),
+    birthDate: birthDateSchema,
+    phone: phoneSchema,
+    email: z.preprocess(
+      (value) => (value === "" ? undefined : value),
+      z.string().trim().toLowerCase().email().max(254).optional(),
+    ),
+    publicProfile: z.boolean(),
+    positionCodes: z
+      .array(z.string().regex(/^[A-Z_]{1,16}$/))
+      .max(3)
+      .refine(
+        (values) => new Set(values).size === values.length,
+        "As posições não podem se repetir.",
+      ),
+  }),
+  z.object({
+    ...athleteTeamFields,
+    profileOwner: z.literal("player"),
+  }),
+]);
+
+export const removeAthleteSchema = z.object({
+  athleteId: z.string().uuid(),
+  teamSlug: z.string().regex(TEAM_SLUG_PATTERN),
+});
+
 export const createEventSchema = z.object({
   teamId: z.string().uuid(),
   teamSlug: z.string().regex(TEAM_SLUG_PATTERN),

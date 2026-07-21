@@ -1,6 +1,8 @@
 import {
   createInvitationSchema,
   createTeamSchema,
+  normalizeTeamSocialUrl,
+  normalizeWebsiteUrl,
   sanitizeTeamSlug,
   slugifyTeamName,
   updateTeamSchema,
@@ -69,6 +71,9 @@ describe("onboarding validation", () => {
         sportFormat: "society",
         timezone: "America/Sao_Paulo",
         isPublic: true,
+        about: "Futebol e amizade desde 2019.",
+        instagramUrl: "https://instagram.com/racha-das-7",
+        websiteUrl: "https://racha.example.com",
       }).success,
     ).toBe(true);
   });
@@ -82,6 +87,41 @@ describe("onboarding validation", () => {
         sportFormat: "society",
         timezone: "UTC",
         isPublic: true,
+      }).success,
+    ).toBe(false);
+  });
+
+  it("turns social handles and domains into secure links", () => {
+    expect(normalizeTeamSocialUrl("@racha.das7", "instagram")).toBe(
+      "https://instagram.com/racha.das7",
+    );
+    expect(normalizeTeamSocialUrl("racha7", "tiktok")).toBe(
+      "https://tiktok.com/@racha7",
+    );
+    expect(normalizeWebsiteUrl("racha.example.com")).toBe(
+      "https://racha.example.com",
+    );
+  });
+
+  it("rejects insecure or mismatched social destinations", () => {
+    const base = {
+      teamId: "10000000-0000-4000-8000-000000000001",
+      currentSlug: "racha-das-7",
+      name: "Racha das 7",
+      sportFormat: "society",
+      timezone: "America/Sao_Paulo",
+      isPublic: true,
+    } as const;
+    expect(
+      updateTeamSchema.safeParse({
+        ...base,
+        instagramUrl: "http://instagram.com/racha",
+      }).success,
+    ).toBe(false);
+    expect(
+      updateTeamSchema.safeParse({
+        ...base,
+        instagramUrl: "https://evil.example/racha",
       }).success,
     ).toBe(false);
   });

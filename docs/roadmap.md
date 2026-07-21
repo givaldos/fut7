@@ -28,7 +28,9 @@ Cada item abaixo foi escrito para virar issue do GitHub. O critério global de p
 - [x] Listar elenco e solicitações pendentes com PII restrita a staff.
 - [x] Cadastrar atleta ativo com até três posições ordenadas da modalidade do time.
 - [x] Aprovar/rejeitar cadastro público e ativar/inativar atleta.
-- [ ] Pesquisar, editar cadastro e trocar preferências após a criação.
+- [x] Editar cadastro administrativo até a reivindicação; depois dela, restringir owner/admin aos dados do vínculo.
+- [x] Remover atleta sem afetar perfil global/outros times, minimizando o cadastro e preservando a identificação necessária às súmulas históricas.
+- [ ] Pesquisar e filtrar o elenco por nome, posição e situação.
 
 ### M1.3 Agenda avulsa
 
@@ -69,6 +71,15 @@ Gerar de 2 a N times equilibrados a partir dos confirmados, levando em conta gol
 - [x] Próximo jogo e chamada como foco principal no mobile.
 - [x] Linha do tempo de eventos e movimentações recentes do BID.
 - [x] Configurações e convites fora da home, em área própria do time.
+
+### M1.8.2 Vitrine social do time
+
+- [x] Sobre e redes sociais editáveis por owner/admin.
+- [x] Escudo, capa e galeria com storage privado e publicação por URL temporária.
+- [x] Escolha administrativa de uma foto de destaque com composição editorial responsiva.
+- [x] Página pública editorial, mobile-first e orientada a entrada no time.
+- [x] BID público limitado ao consentimento individual do atleta.
+- [x] Foto global do atleta com recorte, storage privado, troca/remoção e acesso do BID ao perfil público.
 
 ### M1.9 Súmula e estatísticas básicas
 

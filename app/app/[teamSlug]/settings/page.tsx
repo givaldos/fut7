@@ -2,6 +2,7 @@ import { revokeTeamInvitation } from "@/app/app/team-actions";
 import { AdminInviteForm } from "@/components/admin-invite-form";
 import { TeamAppHeader } from "@/components/team-app-header";
 import { TeamBottomNav } from "@/components/team-bottom-nav";
+import { TeamMediaManager } from "@/components/team-media-manager";
 import { TeamSettingsForm } from "@/components/team-settings-form";
 import { AppContainer } from "@/components/ui/app-shell";
 import { Button } from "@/components/ui/button";
@@ -41,7 +42,12 @@ export default async function TeamSettingsPage({
   ]);
   if (!team) notFound();
 
-  const [{ data: membership }, { data: pendingInvitations, error: invitationsError }] =
+  const [
+    { data: membership },
+    { data: pendingInvitations, error: invitationsError },
+    { data: publicProfile, error: profileError },
+    { data: media, error: mediaError },
+  ] =
     await Promise.all([
       supabase
         .from("team_memberships")
@@ -57,10 +63,37 @@ export default async function TeamSettingsPage({
         .eq("status", "pending")
         .gt("expires_at", now)
         .order("created_at", { ascending: false }),
+      supabase
+        .from("team_public_profiles")
+        .select(
+          "about, instagram_url, facebook_url, youtube_url, tiktok_url, website_url",
+        )
+        .eq("team_id", team.id)
+        .maybeSingle(),
+      supabase
+        .from("team_media")
+        .select("id, kind, storage_path, alt_text, sort_order, is_featured, created_at")
+        .eq("team_id", team.id)
+        .order("kind")
+        .order("sort_order")
+        .order("created_at"),
     ]);
   if (!membership) redirect("/me");
   if (membership.role === "manager") redirect(`/app/${team.slug}`);
-  if (invitationsError) throw new Error("Não foi possível carregar os convites.");
+  if (invitationsError || profileError || mediaError) {
+    throw new Error("Não foi possível carregar as configurações do time.");
+  }
+
+  const mediaPaths = (media ?? []).map((item) => item.storage_path);
+  const { data: signedMedia, error: signedMediaError } = mediaPaths.length
+    ? await supabase.storage.from("team_media").createSignedUrls(mediaPaths, 3600)
+    : { data: [], error: null };
+  if (signedMediaError) throw new Error("Não foi possível carregar as imagens do time.");
+  const signedUrlByPath = new Map(
+    (signedMedia ?? [])
+      .filter((item) => item.path && item.signedUrl)
+      .map((item) => [item.path as string, item.signedUrl as string]),
+  );
 
   return (
     <main className="app-canvas min-h-screen pb-24">
@@ -99,6 +132,33 @@ export default async function TeamSettingsPage({
         ) : null}
 
         <section className="app-surface p-5 sm:p-7">
+          <div className="mb-6">
+            <p className="app-kicker">Visual</p>
+            <h2 className="mt-2 text-xl font-black tracking-tight text-slate-950">A cara do time</h2>
+            <p className="mt-1 text-sm leading-6 text-slate-500">
+              Escudo, capa e momentos que deixam a página viva.
+            </p>
+          </div>
+          <TeamMediaManager
+            teamId={team.id}
+            teamSlug={team.slug}
+            teamName={team.name}
+            media={(media ?? []).flatMap((item) => {
+              const url = signedUrlByPath.get(item.storage_path);
+              return url
+                ? [{
+                    id: item.id,
+                    kind: item.kind as "logo" | "cover" | "gallery",
+                    url,
+                    altText: item.alt_text || `Foto do ${team.name}`,
+                    isFeatured: item.is_featured,
+                  }]
+                : [];
+            })}
+          />
+        </section>
+
+        <section className="app-surface p-5 sm:p-7">
           <div className="mb-6 flex items-center justify-between gap-4">
             <div>
               <h2 className="text-xl font-black tracking-tight text-slate-950">Perfil do time</h2>
@@ -118,6 +178,12 @@ export default async function TeamSettingsPage({
               defaultSportFormat: team.default_sport_format,
               timezone: team.timezone,
               isPublic: team.is_public,
+              about: publicProfile?.about ?? "",
+              instagramUrl: publicProfile?.instagram_url ?? "",
+              facebookUrl: publicProfile?.facebook_url ?? "",
+              youtubeUrl: publicProfile?.youtube_url ?? "",
+              tiktokUrl: publicProfile?.tiktok_url ?? "",
+              websiteUrl: publicProfile?.website_url ?? "",
             }}
           />
         </section>

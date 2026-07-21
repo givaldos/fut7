@@ -17,7 +17,7 @@ O baseline é OWASP ASVS 5.0 nível 2 e OWASP Top 10. Isso não é uma certifica
 | Risco | Controle |
 | --- | --- |
 | A01 Broken Access Control | RLS em todas as tabelas, chaves compostas anti-cross-tenant, DAL server-side, último owner protegido, convites limitados por papel, súmula mutável somente por staff, agregados públicos condicionados ao opt-in e testes pgTAP por papel |
-| A02 Security Misconfiguration | headers seguros, CSP com nonce, HSTS em produção, `poweredByHeader` removido, schemas expostos mínimos, bucket privado |
+| A02 Security Misconfiguration | headers seguros, CSP com nonce em produção e exceções apenas para o runtime de desenvolvimento do Next.js, HSTS em produção, `poweredByHeader` removido, schemas expostos mínimos, bucket privado |
 | A03 Supply Chain | lockfile, versões exatas, scripts de instalação allowlisted, Dependabot, dependency review, CodeQL, ações GitHub fixadas por SHA |
 | A04 Cryptographic Failures | TLS pelas plataformas, segredos fora do Git, tokens de convite aleatórios persistidos somente como SHA-256, variáveis sensíveis na Vercel, estado remoto do Terraform obrigatório |
 | A05 Injection | Zod, SQL parametrizado pelo SDK, RPC tipada, sem `eval`/`new Function`, regras ESLint |
@@ -41,7 +41,10 @@ O Turnstile não substitui rate limiting. Antes de abrir produção, configure l
 - alteração administrativa de presença confere evento, atleta ativo e time novamente no banco;
 - lançamento da súmula exige staff e atleta confirmado; o minuto é opcional, correções ajustam o placar e são auditadas;
 - estatísticas ignoram rascunhos e são derivadas somente de eventos concluídos com súmula encerrada;
-- `INSERT` direto em `athletes`, `athlete_private`, `venues`, `events` e `event_attendance` foi removido de `authenticated` para impedir agregados parciais;
+- perfil reivindicado pelo atleta torna nome, contato, privacidade e posições imutáveis para owner/admin; somente camisa e observação interna do vínculo permanecem editáveis;
+- foto de perfil é gravada pelo atleta apenas na própria pasta do bucket privado, vinculada por RPC auditada e exposta por URL temporária somente após opt-in público;
+- remoção do vínculo exige owner/admin, apaga cadastros sem histórico e minimiza os que possuem fatos esportivos, removendo contato, nascimento, consentimentos e chamadas futuras enquanto preserva a identificação necessária à súmula;
+- `INSERT` direto em `athletes`, `athlete_private`, `venues`, `events` e `event_attendance`, além de mutações diretas em atleta/PII/posições, foi removido de `authenticated` para impedir bypass dos workflows;
 - mudanças de status de atleta, evento e presença continuam registradas em `audit_logs` sem copiar PII.
 
 ## LGPD e privacidade

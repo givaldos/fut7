@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { AppContainer, Metric } from "@/components/ui/app-shell";
+import { Progress } from "@/components/ui/progress";
 import { requireUser } from "@/lib/auth/dal";
 import { createClient } from "@/lib/supabase/server";
 import {
@@ -274,12 +275,11 @@ export default async function PlayerPortalPage({
             Revise sua apresentação, posições e visibilidade sem misturar com a
             agenda.
           </p>
-          <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-100">
-            <div
-              className="h-full rounded-full bg-emerald-600"
-              style={{ width: `${profileProgress}%` }}
-            />
-          </div>
+          <Progress
+            className="mt-4"
+            label="Progresso do perfil de atleta"
+            value={profileProgress}
+          />
           <div className="mt-4 flex flex-wrap gap-2">
             <Button asChild variant="outline" className="h-11 rounded-xl">
               <Link href="/me/perfil">Ver perfil</Link>

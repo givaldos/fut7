@@ -20,11 +20,13 @@ export function PublicEventAttendance({
   eventId,
   currentStatus,
   deadlineClosed,
+  inverted = false,
 }: {
   teamSlug: string;
   eventId: string;
   currentStatus: AttendanceStatus;
   deadlineClosed: boolean;
+  inverted?: boolean;
 }) {
   const initialState: PublicAttendanceState = {};
   const [state, action, pending] = useActionState(respondToPublicEvent, initialState);
@@ -43,7 +45,11 @@ export function PublicEventAttendance({
             value={status}
             disabled={pending || deadlineClosed}
             data-active={selectedStatus === status}
-            className={`flex min-h-12 items-center justify-center gap-1.5 rounded-xl border border-slate-200 px-1 text-xs font-semibold text-slate-600 transition disabled:cursor-not-allowed disabled:opacity-40 ${activeClass}`}
+            className={`flex min-h-12 items-center justify-center gap-1.5 rounded-xl border px-1 text-xs font-semibold transition disabled:cursor-not-allowed disabled:opacity-40 ${
+              inverted
+                ? "border-white/15 bg-white/10 text-white hover:bg-white/15"
+                : "border-slate-200 text-slate-600"
+            } ${activeClass}`}
           >
             {pending ? <LoaderCircle className="size-4 animate-spin" aria-hidden /> : <Icon className="size-4" aria-hidden />}
             {label}

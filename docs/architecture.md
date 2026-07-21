@@ -8,7 +8,7 @@ O Fut7 é um SaaS multi-time. A mesma pessoa pode administrar vários times, cad
 
 1. **Identidade e acesso** — Supabase Auth identifica a pessoa. Administradores usam e-mail e atletas usam OTP no WhatsApp sem senha. `team_memberships` define papéis administrativos; `player_profiles` e `player_position_preferences` pertencem à pessoa, independentemente de time.
    `team_invitations` representa acesso administrativo pendente.
-2. **BID do time** — `athletes` é o vínculo entre perfil e time. Cada vínculo nasce pendente e exige aprovação independente do staff; `athlete_private` isola telefone, e-mail, nascimento e observações; `athlete_position_preferences` materializa as posições usadas pelo time.
+2. **BID do time** — `athletes` é o vínculo entre perfil e time. Cada vínculo nasce pendente e exige aprovação independente do staff; `athlete_private` isola telefone, e-mail, nascimento e observações; `athlete_position_preferences` materializa as posições usadas pelo time. Antes da reivindicação por WhatsApp, owner/admin pode corrigir a identidade provisória; depois dela, nome, foto, privacidade e posições pertencem exclusivamente ao atleta. A vitrine pública inclui somente vínculos ativos cujo atleta consentiu em tornar o perfil público.
 3. **Agenda** — `event_series` descreve uma recorrência e `events` materializa cada ocorrência. Jogos avulsos não precisam de série.
 4. **Presença** — `event_attendance` registra a resposta do atleta para uma ocorrência específica.
 5. **Divisão e escalação** — `event_squads` representa os times de um racha; `lineup_spots` posiciona apenas atletas confirmados no evento.
@@ -55,7 +55,7 @@ Todas as tabelas de domínio carregam `team_id` ou dependem de uma chave compost
 ## Rotas
 
 - `/`: apresentação do produto;
-- `/t/{slug}`: perfil público e elenco com opt-in;
+- `/t/{slug}`: vitrine social do time com capa, sobre, redes, agenda, galeria e BID exclusivamente opt-in;
 - `/t/{slug}/cadastro`: entrada assistida que oferece login por WhatsApp para reutilizar um perfil existente ou criação do primeiro perfil; o vínculo com o time sempre nasce como `pending`;
 - `/me`: portal privado do atleta, times, jogos, presença e edição do perfil;
 - `/me/agenda/{eventId}`: placar e cronologia da partida para atleta aprovado, com atualização automática durante o jogo;
@@ -69,6 +69,7 @@ Todas as tabelas de domínio carregam `team_id` ou dependem de uma chave compost
 - `/app/{teamSlug}/settings`: identidade do time, visibilidade pública e convites administrativos, limitada a owner/admin;
 - `/app/{teamSlug}/athletes`: BID, aprovação e disponibilidade do elenco;
 - `/app/{teamSlug}/athletes/new`: cadastro administrativo atômico;
+- `/app/{teamSlug}/athletes/{athleteId}/edit`: edição condicionada à propriedade do perfil, limitada a owner/admin;
 - `/app/{teamSlug}/events`: agenda e contagem da chamada;
 - `/app/{teamSlug}/events/new`: evento avulso ou série semanal;
 - `/app/{teamSlug}/events/{eventId}`: detalhe, presença administrativa e base confirmada da escala.
@@ -91,7 +92,20 @@ O papel `authenticated` não possui `INSERT` direto em `teams`.
 
 As Server Actions validam formato e tamanho, mas a autorização e a atomicidade são impostas novamente no PostgreSQL. RPCs estreitas criam atleta + PII + preferências + chamadas futuras e evento/série + local + chamadas do elenco em uma única transação. A súmula também usa RPCs estreitas: somente staff registra ou corrige lances, o banco exige atleta confirmado e cada alteração gera auditoria. A súmula pode ser preparada antes do horário marcado; apenas seu encerramento exige que a partida tenha começado. O papel autenticado não possui `INSERT` direto nas tabelas centrais desses agregados.
 
+Edição e remoção do BID também passam por RPCs estreitas. Um vínculo sem histórico esportivo pode ser apagado fisicamente; havendo presença respondida, escala ou lance histórico, o registro é minimizado e arquivado. O processo remove contato, nascimento, consentimentos, posições e chamadas futuras, desconecta o usuário e preserva somente nome esportivo, camisa e fatos históricos. O perfil global e vínculos em outros times nunca são alterados.
+
 O atleta aprovado lê a súmula pelo RLS do próprio time, sem permissão de escrita. O perfil privado obtém seu agregado autenticado; o perfil público expõe somente contagens derivadas de partidas encerradas quando `is_public = true`.
+
+## Perfil social e mídia
+
+- `team_public_profiles` armazena texto institucional e links HTTPS validados; a atualização conjunta com os dados centrais do time é atômica e limitada a owner/admin;
+- `team_media` registra logo, capa e até 13 fotos de galeria, enquanto os bytes permanecem no bucket privado `team_media`;
+- cada time mantém no máximo uma foto de galeria em destaque; owner/admin escolhe por RPC serializada e auditada, e a primeira foto disponível assume automaticamente quando necessário;
+- a foto de atleta pertence ao `player_profile`, usa caminho aleatório sob o UUID do próprio usuário no bucket privado `athlete_avatars` e acompanha a pessoa em todos os times;
+- uploads aceitam apenas JPG, PNG ou WebP de até 5 MB e usam caminhos aleatórios sob a pasta UUID do time ou do próprio atleta;
+- a página pública nunca recebe a chave privilegiada: o servidor consulta views públicas mínimas e assina por uma hora somente os caminhos retornados por essas views;
+- caminhos de logo derivam exclusivamente da relação `team_media`; fotos de atleta precisam corresponder ao UUID do dono e só chegam às views públicas quando `is_public = true`, evitando assinatura privilegiada de objetos arbitrários;
+- substituição, inclusão e remoção de mídia passam por RPCs estreitas, serializadas e auditadas.
 
 ## Recorrência
 

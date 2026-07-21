@@ -32,6 +32,64 @@ export const createTeamSchema = z.object({
   sportFormat: z.enum(["field", "society", "futsal"]),
 });
 
+const optionalText = (max: number) =>
+  z.preprocess(
+    (value) =>
+      typeof value === "string" && value.trim() === "" ? undefined : value,
+    z.string().trim().max(max).optional(),
+  );
+
+const secureUrl = (hosts?: string[]) =>
+  z.preprocess(
+    (value) =>
+      typeof value === "string" && value.trim() === "" ? undefined : value,
+    z
+      .url()
+      .max(300)
+      .refine((value) => {
+        const parsed = new URL(value);
+        return (
+          parsed.protocol === "https:" &&
+          !parsed.username &&
+          !parsed.password &&
+          (!hosts || hosts.includes(parsed.hostname.toLowerCase()))
+        );
+      })
+      .optional(),
+  );
+
+const socialHosts = {
+  instagram: ["instagram.com", "www.instagram.com"],
+  facebook: ["facebook.com", "www.facebook.com", "fb.com", "www.fb.com"],
+  youtube: ["youtube.com", "www.youtube.com", "youtu.be"],
+  tiktok: ["tiktok.com", "www.tiktok.com"],
+} as const;
+
+export type TeamSocialNetwork = keyof typeof socialHosts;
+
+export function normalizeTeamSocialUrl(
+  value: FormDataEntryValue | null,
+  network: TeamSocialNetwork,
+) {
+  const raw = typeof value === "string" ? value.trim() : "";
+  if (!raw) return undefined;
+  const handle = raw.replace(/^@/, "");
+  const base = {
+    instagram: "https://instagram.com/",
+    facebook: "https://facebook.com/",
+    youtube: "https://youtube.com/",
+    tiktok: "https://tiktok.com/@",
+  }[network];
+  if (/^[a-zA-Z0-9._-]{2,80}$/.test(handle)) return `${base}${handle}`;
+  return /^https:\/\//i.test(raw) ? raw : `https://${raw}`;
+}
+
+export function normalizeWebsiteUrl(value: FormDataEntryValue | null) {
+  const raw = typeof value === "string" ? value.trim() : "";
+  if (!raw) return undefined;
+  return /^https:\/\//i.test(raw) ? raw : `https://${raw}`;
+}
+
 export const updateTeamSchema = z.object({
   teamId: z.string().uuid(),
   currentSlug: z.string().regex(TEAM_SLUG_PATTERN),
@@ -39,6 +97,12 @@ export const updateTeamSchema = z.object({
   sportFormat: z.enum(["field", "society", "futsal"]),
   timezone: z.literal("America/Sao_Paulo"),
   isPublic: z.boolean(),
+  about: optionalText(1600),
+  instagramUrl: secureUrl([...socialHosts.instagram]),
+  facebookUrl: secureUrl([...socialHosts.facebook]),
+  youtubeUrl: secureUrl([...socialHosts.youtube]),
+  tiktokUrl: secureUrl([...socialHosts.tiktok]),
+  websiteUrl: secureUrl(),
 });
 
 export const createInvitationSchema = z.object({

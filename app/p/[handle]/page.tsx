@@ -1,3 +1,5 @@
+/* eslint-disable @next/next/no-img-element */
+
 import { getPublicPlayer } from "@/lib/data/public-player";
 import { BrandMark } from "@/components/brand-mark";
 import {
@@ -42,8 +44,16 @@ export default async function PublicPlayerPage({ params }: { params: Promise<{ h
         <div className="pointer-events-none absolute -right-20 -top-24 size-64 rounded-full bg-emerald-500/20 blur-3xl" />
         <div className="relative mx-auto max-w-xl">
           <BrandMark className="[&_span:last-child]:text-white" />
-          <div className="mt-10 grid size-20 place-items-center rounded-3xl bg-white/10 text-emerald-100">
-            <UserRound className="size-9" aria-hidden />
+          <div className="mt-10 grid size-28 place-items-center overflow-hidden rounded-[2rem] bg-white/10 text-emerald-100 ring-1 ring-white/15 shadow-2xl">
+            {player.photo_url ? (
+              <img
+                src={player.photo_url}
+                alt={`Foto de ${player.preferred_name || player.display_name}`}
+                className="size-full object-cover"
+              />
+            ) : (
+              <UserRound className="size-11" aria-hidden />
+            )}
           </div>
           <div className="mt-5 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-emerald-300"><BadgeCheck className="size-4" aria-hidden /> Perfil verificado</div>
           <h1 className="mt-2 text-4xl font-black tracking-[-0.045em]">{player.preferred_name || player.display_name}</h1>

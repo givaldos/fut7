@@ -4,10 +4,12 @@ export function buildContentSecurityPolicy(nonce: string, isDevelopment: boolean
   return [
     "default-src 'self'",
     `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${isDevelopment ? " 'unsafe-eval'" : ""} https://challenges.cloudflare.com`,
-    `style-src 'self' 'nonce-${nonce}'`,
-    "img-src 'self' blob: data: https://*.supabase.co",
+    // Next.js Dev Tools and the route announcer apply runtime styles while the
+    // development server is active. Production remains nonce-only.
+    `style-src 'self' ${isDevelopment ? "'unsafe-inline'" : `'nonce-${nonce}'`}`,
+    `img-src 'self' blob: data: https://*.supabase.co${isDevelopment ? " http://127.0.0.1:54321 http://localhost:54321" : ""}`,
     "font-src 'self'",
-    "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://challenges.cloudflare.com http://127.0.0.1:54321 ws://127.0.0.1:54321",
+    `connect-src 'self' https://*.supabase.co wss://*.supabase.co https://challenges.cloudflare.com${isDevelopment ? " http://127.0.0.1:54321 ws://127.0.0.1:54321 http://localhost:54321 ws://localhost:54321" : ""}`,
     "frame-src https://challenges.cloudflare.com",
     "worker-src 'self' blob:",
     "object-src 'none'",
@@ -41,4 +43,3 @@ export function applySecurityHeaders(
 
   return response;
 }
-

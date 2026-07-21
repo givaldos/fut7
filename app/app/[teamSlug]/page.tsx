@@ -2,6 +2,7 @@ import { TeamAppHeader } from "@/components/team-app-header";
 import { TeamBottomNav } from "@/components/team-bottom-nav";
 import { AppContainer } from "@/components/ui/app-shell";
 import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 import { requireUser } from "@/lib/auth/dal";
 import { getAppUrl } from "@/lib/env/server";
 import { createClient } from "@/lib/supabase/server";
@@ -113,11 +114,13 @@ export default async function TeamDashboardPage({
       .from("athletes")
       .select("id", { count: "exact", head: true })
       .eq("team_id", currentTeam.id)
+      .is("removed_at", null)
       .eq("status", "active"),
     supabase
       .from("athletes")
       .select("id", { count: "exact", head: true })
       .eq("team_id", currentTeam.id)
+      .is("removed_at", null)
       .eq("status", "pending"),
     supabase
       .from("events")
@@ -145,6 +148,7 @@ export default async function TeamDashboardPage({
         "id, full_name, preferred_name, status, created_at, updated_at, approved_at",
       )
       .eq("team_id", currentTeam.id)
+      .is("removed_at", null)
       .order("updated_at", { ascending: false })
       .limit(8),
     supabase
@@ -379,12 +383,13 @@ export default async function TeamDashboardPage({
                     {Math.round((completedSteps / activationSteps.length) * 100)}%
                   </span>
                 </div>
-                <div className="mt-4 h-2 overflow-hidden rounded-full bg-amber-200">
-                  <div
-                    className="h-full rounded-full bg-amber-500 transition-[width]"
-                    style={{ width: `${(completedSteps / activationSteps.length) * 100}%` }}
-                  />
-                </div>
+                <Progress
+                  className="mt-4"
+                  label="Progresso da ativação do time"
+                  max={activationSteps.length}
+                  tone="amber"
+                  value={completedSteps}
+                />
               </div>
             </div>
 

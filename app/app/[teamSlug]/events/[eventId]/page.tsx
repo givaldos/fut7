@@ -79,6 +79,7 @@ export default async function EventDetailPage({
       .from("athletes")
       .select("id, full_name, preferred_name, shirt_number, status")
       .eq("team_id", team.id)
+      .is("removed_at", null)
       .in("status", ["active", "inactive"])
       .order("preferred_name", { nullsFirst: false })
       .order("full_name"),

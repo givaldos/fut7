@@ -1,3 +1,5 @@
+/* eslint-disable @next/next/no-img-element */
+
 import { Button } from "@/components/ui/button";
 import { AppContainer, PageHeader } from "@/components/ui/app-shell";
 import { requireUser } from "@/lib/auth/dal";
@@ -43,7 +45,7 @@ export default async function PlayerProfilePage({
     supabase
       .from("player_profiles")
       .select(
-        "handle, display_name, preferred_name, bio, is_public, phone_verified_at",
+        "handle, display_name, preferred_name, bio, photo_path, is_public, phone_verified_at",
       )
       .eq("user_id", user.id)
       .maybeSingle(),
@@ -60,6 +62,11 @@ export default async function PlayerProfilePage({
     supabase.rpc("get_my_player_statistics"),
   ]);
   const query = await searchParams;
+  const { data: signedPhoto } = profile?.photo_path
+    ? await supabase.storage
+        .from("athlete_avatars")
+        .createSignedUrl(profile.photo_path, 3600)
+    : { data: null };
   const positionLabelByKey = new Map(
     (positions ?? []).map((position) => [
       `${position.sport_format}:${position.code}`,
@@ -136,8 +143,16 @@ export default async function PlayerProfilePage({
           <section className="relative overflow-hidden rounded-[2rem] bg-slate-950 text-white shadow-float">
             <div className="pointer-events-none absolute -right-16 -top-20 size-64 rounded-full bg-emerald-500/20 blur-3xl" />
             <div className="relative p-6 sm:p-8">
-              <div className="grid size-14 place-items-center rounded-2xl bg-white/10 text-emerald-100">
-                <UserRound className="size-7" aria-hidden />
+              <div className="grid size-24 place-items-center overflow-hidden rounded-[1.75rem] bg-white/10 text-emerald-100 ring-1 ring-white/15">
+                {signedPhoto?.signedUrl ? (
+                  <img
+                    src={signedPhoto.signedUrl}
+                    alt={`Foto de ${profile.preferred_name || profile.display_name}`}
+                    className="size-full object-cover"
+                  />
+                ) : (
+                  <UserRound className="size-10" aria-hidden />
+                )}
               </div>
               <div className="mt-5 flex flex-wrap items-center gap-2">
                 {profile.phone_verified_at && (

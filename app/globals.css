@@ -112,4 +112,49 @@
   .app-interactive {
     @apply transition duration-200 hover:-translate-y-0.5 hover:border-emerald-300 hover:shadow-[0_16px_40px_-24px_rgba(5,80,52,0.4)];
   }
+
+  .app-progress {
+    @apply block h-2 w-full overflow-hidden rounded-full border-0;
+    appearance: none;
+  }
+
+  .app-progress::-webkit-progress-bar {
+    border-radius: 9999px;
+  }
+
+  .app-progress::-webkit-progress-value {
+    border-radius: 9999px;
+  }
+
+  .app-progress::-moz-progress-bar {
+    border-radius: 9999px;
+  }
+
+  .app-progress--emerald,
+  .app-progress--emerald::-webkit-progress-bar {
+    background-color: rgb(241 245 249);
+  }
+
+  .app-progress--emerald {
+    color: rgb(16 185 129);
+  }
+
+  .app-progress--emerald::-webkit-progress-value,
+  .app-progress--emerald::-moz-progress-bar {
+    background-color: rgb(16 185 129);
+  }
+
+  .app-progress--amber,
+  .app-progress--amber::-webkit-progress-bar {
+    background-color: rgb(253 230 138);
+  }
+
+  .app-progress--amber {
+    color: rgb(245 158 11);
+  }
+
+  .app-progress--amber::-webkit-progress-value,
+  .app-progress--amber::-moz-progress-bar {
+    background-color: rgb(245 158 11);
+  }
 }

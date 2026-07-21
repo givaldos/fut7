@@ -8,12 +8,114 @@ import {
 } from "@/lib/validation/operations";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { z } from "zod";
 
 export type PlayerProfileState = {
   status?: "success" | "error";
   message?: string;
   errors?: Record<string, string[] | undefined>;
 };
+
+const playerPhotoSchema = z.object({
+  storagePath: z
+    .string()
+    .min(80)
+    .max(180)
+    .regex(
+      /^[0-9a-f-]{36}\/profile\/[0-9a-f-]{36}\.(?:jpg|png|webp)$/,
+    ),
+});
+
+export type PlayerPhotoActionResult =
+  | { ok: true; message: string }
+  | { ok: false; message: string };
+
+async function revalidatePlayerPhotoPages(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  userId: string,
+) {
+  const [{ data: profile }, { data: links }] = await Promise.all([
+    supabase
+      .from("player_profiles")
+      .select("handle")
+      .eq("user_id", userId)
+      .maybeSingle(),
+    supabase.rpc("list_my_player_team_links"),
+  ]);
+
+  revalidatePath("/me");
+  revalidatePath("/me/perfil");
+  revalidatePath("/me/perfil/editar");
+  if (profile?.handle) revalidatePath(`/p/${profile.handle}`);
+  for (const link of links ?? []) {
+    if (link.team_slug) revalidatePath(`/t/${link.team_slug}`);
+  }
+}
+
+export async function registerMyPlayerPhoto(
+  formData: FormData,
+): Promise<PlayerPhotoActionResult> {
+  const user = await requireUser();
+  const parsed = playerPhotoSchema.safeParse({
+    storagePath: formData.get("storagePath"),
+  });
+  if (
+    !parsed.success ||
+    !parsed.data.storagePath.startsWith(`${user.id}/profile/`)
+  ) {
+    return { ok: false, message: "Não foi possível validar essa foto." };
+  }
+
+  const supabase = await createClient();
+  const { data: previousPath, error } = await supabase.rpc(
+    "replace_my_player_photo",
+    { requested_storage_path: parsed.data.storagePath },
+  );
+  if (error) {
+    await supabase.storage
+      .from("athlete_avatars")
+      .remove([parsed.data.storagePath]);
+    return {
+      ok: false,
+      message:
+        error.code === "42501"
+          ? "Sua sessão expirou. Entre novamente para trocar a foto."
+          : "Não foi possível salvar a foto agora.",
+    };
+  }
+
+  if (
+    typeof previousPath === "string" &&
+    previousPath !== parsed.data.storagePath
+  ) {
+    await supabase.storage.from("athlete_avatars").remove([previousPath]);
+  }
+  await revalidatePlayerPhotoPages(supabase, user.id);
+  return { ok: true, message: "Foto de perfil atualizada." };
+}
+
+export async function removeMyPlayerPhoto(): Promise<PlayerPhotoActionResult> {
+  const user = await requireUser();
+  const supabase = await createClient();
+  const { data: previousPath, error } = await supabase.rpc(
+    "remove_my_player_photo",
+  );
+  if (error) {
+    return {
+      ok: false,
+      message:
+        error.code === "42501"
+          ? "Sua sessão expirou. Entre novamente para remover a foto."
+          : "Não foi possível remover a foto agora.",
+    };
+  }
+
+  if (typeof previousPath === "string") {
+    await supabase.storage.from("athlete_avatars").remove([previousPath]);
+  }
+  await revalidatePlayerPhotoPages(supabase, user.id);
+  return { ok: true, message: "Foto de perfil removida." };
+}
 
 export async function updateMyPlayerProfile(
   _previousState: PlayerProfileState,

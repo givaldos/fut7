@@ -1,5 +1,6 @@
 import "server-only";
 
+import { createPrivilegedClient } from "@/lib/supabase/privileged";
 import { createClient } from "@/lib/supabase/server";
 
 export async function getPublicPlayer(handle: string) {
@@ -22,9 +23,15 @@ export async function getPublicPlayer(handle: string) {
     throw new Error("Não foi possível carregar o perfil público.");
   }
   if (!data) return null;
+  const { data: signedPhoto } = data.photo_path
+    ? await createPrivilegedClient().storage
+        .from("athlete_avatars")
+        .createSignedUrl(data.photo_path, 3600)
+    : { data: null };
 
   return {
     ...data,
+    photo_url: signedPhoto?.signedUrl ?? null,
     statistics: statisticRows?.[0] ?? {
       matches_played: 0,
       goals: 0,

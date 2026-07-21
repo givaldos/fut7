@@ -1,4 +1,5 @@
 import { PlayerProfileForm } from "@/components/player-profile-form";
+import { PlayerAvatarManager } from "@/components/player-avatar-manager";
 import { requireUser } from "@/lib/auth/dal";
 import { createClient } from "@/lib/supabase/server";
 import { ArrowLeft, ShieldCheck } from "lucide-react";
@@ -16,7 +17,7 @@ export default async function EditPlayerProfilePage() {
     supabase
       .from("player_profiles")
       .select(
-        "handle, display_name, preferred_name, bio, is_public, phone_verified_at",
+        "handle, display_name, preferred_name, bio, photo_path, is_public, phone_verified_at",
       )
       .eq("user_id", user.id)
       .maybeSingle(),
@@ -32,6 +33,11 @@ export default async function EditPlayerProfilePage() {
       .order("sort_order"),
   ]);
   if (!profile) notFound();
+  const { data: signedPhoto } = profile.photo_path
+    ? await supabase.storage
+        .from("athlete_avatars")
+        .createSignedUrl(profile.photo_path, 3600)
+    : { data: null };
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-6 sm:py-10">
@@ -55,6 +61,14 @@ export default async function EditPlayerProfilePage() {
       </div>
 
       <section className="mt-6 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
+        <PlayerAvatarManager
+          userId={user.id}
+          playerName={profile.preferred_name || profile.display_name}
+          photoUrl={signedPhoto?.signedUrl ?? null}
+        />
+      </section>
+
+      <section className="mt-4 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
         <PlayerProfileForm
           profile={profile}
           positions={

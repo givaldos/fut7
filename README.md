@@ -10,7 +10,8 @@ Esta fundação já entrega:
 - design system próprio sobre Tailwind e Radix, com navegação e alvos de toque mobile-first;
 - autenticação Supabase com sessão em cookies;
 - identidade global do atleta com login sem senha por OTP no WhatsApp;
-- perfil pessoal editável e público/privado em `/p/{handle}`, conectado a vários times;
+- perfil pessoal editável com foto recortável, público/privado em `/p/{handle}` e conectado a vários times;
+- página social do time com capa, sobre, redes, galeria, agenda e BID público consentido;
 - página pública de cada time em `/t/{slug}`;
 - cadastro público com campos persistentes, posições, Turnstile e confirmação do WhatsApp antes do BID;
 - painel autenticado e troca de time para administradores multi-time;

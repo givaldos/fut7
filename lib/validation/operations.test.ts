@@ -3,6 +3,8 @@ import {
   createEventSchema,
   matchIncidentSchema,
   matchReportSchema,
+  removeAthleteSchema,
+  updateAthleteSchema,
   updateEventSchema,
 } from "./operations";
 import { describe, expect, it } from "vitest";
@@ -38,6 +40,53 @@ describe("operational validation", () => {
 
     expect(createAthleteSchema.safeParse({ ...base, positionCodes: ["MID", "MID"] }).success).toBe(false);
     expect(createAthleteSchema.safeParse({ ...base, positionCodes: ["GK", "FIXO", "MID", "ST"] }).success).toBe(false);
+  });
+
+  it("separates team-owned and player-owned athlete edits", () => {
+    const identity = {
+      athleteId: "11111111-1111-4111-8111-111111111111",
+      teamSlug: "racha-do-bairro",
+      shirtNumber: "8",
+      notes: "Paga a mensalidade no dia 10.",
+    };
+
+    expect(
+      updateAthleteSchema.safeParse({
+        ...identity,
+        profileOwner: "team",
+        fullName: "Maria da Silva",
+        preferredName: "Maria",
+        birthDate: "1995-05-12",
+        phone: "(11) 99999-9999",
+        email: "MARIA@EXAMPLE.TEST",
+        publicProfile: true,
+        positionCodes: ["MID", "ST"],
+      }).success,
+    ).toBe(true);
+
+    const playerOwned = updateAthleteSchema.safeParse({
+      ...identity,
+      profileOwner: "player",
+    });
+    expect(playerOwned.success).toBe(true);
+    if (playerOwned.success) {
+      expect("fullName" in playerOwned.data).toBe(false);
+    }
+  });
+
+  it("validates the athlete removal identity", () => {
+    expect(
+      removeAthleteSchema.safeParse({
+        athleteId: "11111111-1111-4111-8111-111111111111",
+        teamSlug: "racha-do-bairro",
+      }).success,
+    ).toBe(true);
+    expect(
+      removeAthleteSchema.safeParse({
+        athleteId: "not-an-id",
+        teamSlug: "racha-do-bairro",
+      }).success,
+    ).toBe(false);
   });
 
   it("accepts one-off and bounded weekly events", () => {

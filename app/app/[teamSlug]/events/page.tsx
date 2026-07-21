@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { AppContainer, PageHeader } from "@/components/ui/app-shell";
+import { Progress } from "@/components/ui/progress";
 import { TeamAppHeader } from "@/components/team-app-header";
 import { TeamBottomNav } from "@/components/team-bottom-nav";
 import { requireUser } from "@/lib/auth/dal";
@@ -101,12 +102,11 @@ export default async function EventsPage({ params }: { params: Promise<{ teamSlu
               <span className="flex items-center gap-1.5"><UsersRound className="size-3.5" aria-hidden /> {call.confirmed}/{call.total} confirmados</span>
             </div>
             <div className="mt-4 flex items-center gap-3">
-              <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-100">
-                <div
-                  className="h-full rounded-full bg-emerald-500"
-                  style={{ width: `${confirmationProgress}%` }}
-                />
-              </div>
+              <Progress
+                className="h-1.5 flex-1"
+                label={`Confirmações para ${event.title}`}
+                value={confirmationProgress}
+              />
               <span className="text-[10px] font-bold text-slate-400">
                 {confirmationProgress}%
               </span>

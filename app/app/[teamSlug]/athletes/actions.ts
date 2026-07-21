@@ -6,6 +6,8 @@ import {
   athleteAvailabilitySchema,
   athleteReviewSchema,
   createAthleteSchema,
+  removeAthleteSchema,
+  updateAthleteSchema,
 } from "@/lib/validation/operations";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -14,6 +16,8 @@ export type CreateAthleteState = {
   message?: string;
   errors?: Record<string, string[] | undefined>;
 };
+
+export type UpdateAthleteState = CreateAthleteState;
 
 export async function createAthlete(
   _previousState: CreateAthleteState,
@@ -108,3 +112,106 @@ export async function setAthleteAvailability(formData: FormData) {
   revalidatePath(`/app/${parsed.data.teamSlug}/athletes`);
 }
 
+export async function updateAthlete(
+  _previousState: UpdateAthleteState,
+  formData: FormData,
+): Promise<UpdateAthleteState> {
+  await requireUser();
+  const profileOwner = formData.get("profileOwner");
+  const base = {
+    athleteId: formData.get("athleteId"),
+    teamSlug: formData.get("teamSlug"),
+    profileOwner,
+    shirtNumber: formData.get("shirtNumber"),
+    notes: formData.get("notes"),
+  };
+  const parsed = updateAthleteSchema.safeParse(
+    profileOwner === "team"
+      ? {
+          ...base,
+          fullName: formData.get("fullName"),
+          preferredName: formData.get("preferredName"),
+          birthDate: formData.get("birthDate"),
+          phone: formData.get("phone"),
+          email: formData.get("email"),
+          publicProfile: formData.get("publicProfile") === "on",
+          positionCodes: formData.getAll("positionCodes"),
+        }
+      : base,
+  );
+
+  if (!parsed.success) {
+    return {
+      message: "Revise os campos indicados.",
+      errors: parsed.error.flatten().fieldErrors,
+    };
+  }
+
+  const personalFields =
+    parsed.data.profileOwner === "team"
+      ? {
+          athlete_full_name: parsed.data.fullName,
+          athlete_preferred_name: parsed.data.preferredName,
+          athlete_birth_date: parsed.data.birthDate,
+          athlete_phone_e164: parsed.data.phone,
+          athlete_email: parsed.data.email,
+          athlete_public_profile: parsed.data.publicProfile,
+          position_codes: parsed.data.positionCodes,
+        }
+      : {};
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("update_athlete_as_admin", {
+    requested_athlete_id: parsed.data.athleteId,
+    athlete_shirt_number: parsed.data.shirtNumber,
+    team_notes: parsed.data.notes,
+    ...personalFields,
+  });
+
+  if (error) {
+    return {
+      message:
+        error.code === "55000"
+          ? "O atleta assumiu o perfil pessoal. Atualize apenas os dados do vínculo com o time."
+          : error.code === "22023"
+            ? "Há dados inválidos ou posições incompatíveis com a modalidade do time."
+            : "Não foi possível salvar. Confira sua permissão e tente novamente.",
+    };
+  }
+
+  revalidatePath(`/app/${parsed.data.teamSlug}`);
+  revalidatePath(`/app/${parsed.data.teamSlug}/athletes`);
+  redirect(`/app/${parsed.data.teamSlug}/athletes?updated=1`);
+}
+
+export async function removeAthlete(formData: FormData) {
+  await requireUser();
+  const parsed = removeAthleteSchema.safeParse({
+    athleteId: formData.get("athleteId"),
+    teamSlug: formData.get("teamSlug"),
+  });
+  if (!parsed.success) return;
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("remove_athlete_from_team", {
+    requested_athlete_id: parsed.data.athleteId,
+  });
+  if (error || !data?.[0]) {
+    redirect(`/app/${parsed.data.teamSlug}/athletes?removeError=1`);
+  }
+
+  const result = data[0];
+  if (result.removed_photo_path) {
+    await supabase.storage
+      .from("athlete_avatars")
+      .remove([result.removed_photo_path]);
+  }
+
+  revalidatePath(`/app/${parsed.data.teamSlug}`);
+  revalidatePath(`/app/${parsed.data.teamSlug}/athletes`);
+  revalidatePath(`/app/${parsed.data.teamSlug}/events`);
+  revalidatePath("/me");
+  revalidatePath("/me/agenda");
+  redirect(
+    `/app/${parsed.data.teamSlug}/athletes?removed=${result.removal_outcome}`,
+  );
+}
