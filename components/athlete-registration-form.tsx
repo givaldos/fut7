@@ -13,7 +13,13 @@ import {
   TurnstileWidget,
 } from "@/components/turnstile-widget";
 import { createClient } from "@/lib/supabase/client";
-import { CheckCircle2, LoaderCircle, MessageCircle, ShieldCheck } from "lucide-react";
+import {
+  CheckCircle2,
+  LoaderCircle,
+  MessageCircle,
+  ShieldCheck,
+  UserRoundCheck,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -52,13 +58,30 @@ export function AthleteRegistrationForm({
   positions,
   siteKey,
   nonce,
+  existingProfile,
 }: {
   teamSlug: string;
   positions: { code: string; label: string }[];
   siteKey?: string;
   nonce?: string;
+  existingProfile?: {
+    fullName: string;
+    preferredName: string;
+    birthDate: string;
+    positionCodes: string[];
+  };
 }) {
-  const [fields, setFields] = useState(initialFields);
+  const [fields, setFields] = useState<RegistrationFields>(() =>
+    existingProfile
+      ? {
+          ...initialFields,
+          fullName: existingProfile.fullName,
+          preferredName: existingProfile.preferredName,
+          birthDate: existingProfile.birthDate,
+          positionCodes: existingProfile.positionCodes,
+        }
+      : initialFields,
+  );
   const [stage, setStage] = useState<"details" | "otp" | "done">("details");
   const [verifiedPhone, setVerifiedPhone] = useState("");
   const [otp, setOtp] = useState("");
@@ -122,6 +145,32 @@ export function AthleteRegistrationForm({
     }
   }
 
+  async function submitDetails(event: React.FormEvent<HTMLFormElement>) {
+    if (!existingProfile) {
+      await requestOtp(event);
+      return;
+    }
+
+    event.preventDefault();
+    setPending(true);
+    setError(null);
+    try {
+      const completed = await completeAthleteRegistration(
+        registrationFormData(event.currentTarget),
+      );
+      if (!completed.ok) {
+        setError(completed.message);
+        return;
+      }
+      setStage("done");
+      router.refresh();
+    } catch {
+      setError("Não foi possível enviar a solicitação ao time.");
+    } finally {
+      setPending(false);
+    }
+  }
+
   async function verifyAndComplete(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setPending(true);
@@ -158,9 +207,13 @@ export function AthleteRegistrationForm({
     return (
       <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-6 text-center">
         <CheckCircle2 className="mx-auto size-10 text-emerald-700" aria-hidden />
-        <h2 className="mt-4 text-xl font-semibold text-emerald-950">Cadastro confirmado</h2>
+        <h2 className="mt-4 text-xl font-semibold text-emerald-950">
+          {existingProfile ? "Solicitação enviada" : "Cadastro confirmado"}
+        </h2>
         <p className="mt-2 text-sm leading-6 text-emerald-900">
-          Seu perfil pessoal está pronto. O vínculo com este time aguarda a aprovação dos administradores.
+          {existingProfile
+            ? "Seu perfil foi conectado a este time e aguarda a aprovação dos administradores."
+            : "Seu perfil pessoal está pronto. O vínculo com este time aguarda a aprovação dos administradores."}
         </p>
         <Button
           type="button"
@@ -226,7 +279,7 @@ export function AthleteRegistrationForm({
 
   return (
     <>
-      <form onSubmit={requestOtp} className="space-y-5" noValidate>
+      <form onSubmit={submitDetails} className="space-y-5" noValidate>
         <input type="hidden" name="teamSlug" value={teamSlug} />
         <div className="sr-only" aria-hidden="true">
           <Label htmlFor="website">Website</Label>
@@ -315,22 +368,32 @@ export function AthleteRegistrationForm({
           </div>
         </fieldset>
 
-        <div className="space-y-2">
-          <Label htmlFor="phone">WhatsApp *</Label>
-          <Input
-            id="phone"
-            name="phone"
-            type="tel"
-            inputMode="tel"
-            autoComplete="tel"
-            value={fields.phone}
-            onChange={(event) => setFields((current) => ({ ...current, phone: event.target.value }))}
-            placeholder="(11) 99999-9999"
-            maxLength={24}
-            required
-          />
-          <p className="text-xs text-slate-500">Para números do Brasil, adicionamos o +55 automaticamente.</p>
-        </div>
+        {existingProfile ? (
+          <div className="flex items-start gap-3 rounded-2xl bg-emerald-50 p-4 text-sm leading-6 text-emerald-900">
+            <UserRoundCheck className="mt-0.5 size-5 shrink-0 text-emerald-700" aria-hidden />
+            <p>
+              Seus dados vieram do perfil já confirmado pelo WhatsApp. Revise as
+              posições e autorize o vínculo com este time.
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            <Label htmlFor="phone">WhatsApp *</Label>
+            <Input
+              id="phone"
+              name="phone"
+              type="tel"
+              inputMode="tel"
+              autoComplete="tel"
+              value={fields.phone}
+              onChange={(event) => setFields((current) => ({ ...current, phone: event.target.value }))}
+              placeholder="(11) 99999-9999"
+              maxLength={24}
+              required
+            />
+            <p className="text-xs text-slate-500">Para números do Brasil, adicionamos o +55 automaticamente.</p>
+          </div>
+        )}
 
         <label className="flex items-start gap-3 text-sm leading-5 text-slate-700">
           <input
@@ -357,9 +420,9 @@ export function AthleteRegistrationForm({
           <span>Aceito receber convites e confirmações de jogos pelo WhatsApp.</span>
         </label>
 
-        {siteKey ? (
+        {!existingProfile && siteKey ? (
           <TurnstileWidget siteKey={siteKey} nonce={nonce} action="athlete_registration" />
-        ) : process.env.NODE_ENV === "production" ? (
+        ) : !existingProfile && process.env.NODE_ENV === "production" ? (
           <p className="rounded-xl bg-amber-50 p-3 text-sm text-amber-900">
             Cadastro temporariamente indisponível.
           </p>
@@ -373,10 +436,22 @@ export function AthleteRegistrationForm({
           type="submit"
           size="lg"
           className="h-12 w-full rounded-xl bg-emerald-700 text-base hover:bg-emerald-800"
-          disabled={pending || (process.env.NODE_ENV === "production" && !siteKey)}
+          disabled={pending || (!existingProfile && process.env.NODE_ENV === "production" && !siteKey)}
         >
-          {pending ? <LoaderCircle className="animate-spin" aria-hidden /> : <MessageCircle aria-hidden />}
-          {pending ? "Enviando código..." : "Confirmar pelo WhatsApp"}
+          {pending ? (
+            <LoaderCircle className="animate-spin" aria-hidden />
+          ) : existingProfile ? (
+            <UserRoundCheck aria-hidden />
+          ) : (
+            <MessageCircle aria-hidden />
+          )}
+          {pending
+            ? existingProfile
+              ? "Enviando solicitação..."
+              : "Enviando código..."
+            : existingProfile
+              ? "Solicitar entrada no time"
+              : "Confirmar pelo WhatsApp"}
         </Button>
       </form>
     </>

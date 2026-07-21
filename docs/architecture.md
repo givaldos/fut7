@@ -56,7 +56,7 @@ Todas as tabelas de domínio carregam `team_id` ou dependem de uma chave compost
 
 - `/`: apresentação do produto;
 - `/t/{slug}`: perfil público e elenco com opt-in;
-- `/t/{slug}/cadastro`: solicitação pública, sempre criada como `pending`;
+- `/t/{slug}/cadastro`: entrada assistida que oferece login por WhatsApp para reutilizar um perfil existente ou criação do primeiro perfil; o vínculo com o time sempre nasce como `pending`;
 - `/me`: portal privado do atleta, times, jogos, presença e edição do perfil;
 - `/me/agenda/{eventId}`: placar e cronologia da partida para atleta aprovado, com atualização automática durante o jogo;
 - `/p/{handle}`: perfil público somente quando o próprio atleta optou por publicá-lo;
@@ -65,6 +65,8 @@ Todas as tabelas de domínio carregam `team_id` ou dependem de uma chave compost
 - `/app`: roteador entre convites pendentes, criação de time e contexto existente;
 - `/app/new-team`: criação guiada do time;
 - `/app/{teamSlug}`: painel do time.
+- `/app/{teamSlug}` prioriza o próximo jogo, a missão de ativação enquanto incompleta e uma linha do tempo derivada de eventos e movimentações do BID;
+- `/app/{teamSlug}/settings`: identidade do time, visibilidade pública e convites administrativos, limitada a owner/admin;
 - `/app/{teamSlug}/athletes`: BID, aprovação e disponibilidade do elenco;
 - `/app/{teamSlug}/athletes/new`: cadastro administrativo atômico;
 - `/app/{teamSlug}/events`: agenda e contagem da chamada;
@@ -99,6 +101,7 @@ Uma série não é a partida. No MVP, a criação materializa de 2 a 52 ocorrên
 
 - o telefone é normalizado em E.164;
 - Supabase Auth/Twilio verifica a posse do número antes de criar o vínculo no BID; a aplicação nunca confia no telefone vindo do formulário;
+- o login identifica a pessoa antes do vínculo: um perfil existente é reutilizado em novos times, sem duplicar identidade, histórico ou preferências;
 - OTP tem frequência e tentativas limitadas; atleta não cria senha;
 - consentimento e sua versão/evidência são dados de domínio;
 - mensagens são comandos idempotentes na outbox, não chamadas diretas no fluxo do usuário;

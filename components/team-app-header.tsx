@@ -17,7 +17,7 @@ export function TeamAppHeader({
       <div className="mx-auto flex h-[4.5rem] max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
         <div className="flex min-w-0 items-center gap-2 sm:gap-3">
           <BrandMark href={`/app/${currentSlug}`} compact />
-          <TeamSwitcher currentName={currentName} teams={teams} />
+          <TeamSwitcher currentName={currentName} currentSlug={currentSlug} teams={teams} />
         </div>
         <div className="flex items-center gap-2">
           <TeamPrimaryNavigation teamSlug={currentSlug} />

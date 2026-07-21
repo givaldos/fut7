@@ -32,6 +32,15 @@ export const createTeamSchema = z.object({
   sportFormat: z.enum(["field", "society", "futsal"]),
 });
 
+export const updateTeamSchema = z.object({
+  teamId: z.string().uuid(),
+  currentSlug: z.string().regex(TEAM_SLUG_PATTERN),
+  name: z.string().trim().min(2).max(100),
+  sportFormat: z.enum(["field", "society", "futsal"]),
+  timezone: z.literal("America/Sao_Paulo"),
+  isPublic: z.boolean(),
+});
+
 export const createInvitationSchema = z.object({
   teamId: z.string().uuid(),
   teamSlug: z.string().regex(TEAM_SLUG_PATTERN),

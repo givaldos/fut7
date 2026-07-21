@@ -1,11 +1,13 @@
-import { ChevronDown, Mail, Plus } from "lucide-react";
+import { ChevronDown, Mail, Plus, Settings } from "lucide-react";
 import Link from "next/link";
 
 export function TeamSwitcher({
   currentName,
+  currentSlug,
   teams,
 }: {
   currentName: string;
+  currentSlug: string;
   teams: Array<{ name: string; slug: string }>;
 }) {
   return (
@@ -28,6 +30,12 @@ export function TeamSwitcher({
           </Link>
         ))}
         <div className="mt-2 border-t border-slate-100 pt-2">
+          <Link
+            href={`/app/${currentSlug}/settings`}
+            className="flex min-h-10 items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+          >
+            <Settings className="size-4" aria-hidden /> Configurar este time
+          </Link>
           <Link
             href="/app/new-team"
             className="flex min-h-10 items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"

@@ -224,7 +224,7 @@ export default async function PublicTeamPage({
             className="mt-5 h-12 w-full rounded-xl bg-emerald-700 hover:bg-emerald-800"
           >
             <Link href={teamLink?.athlete_status === "active" ? "/me" : `/t/${slug}/cadastro`}>
-              {teamLink?.athlete_status === "active" ? "Abrir minha área" : "Cadastrar como atleta"} <ArrowRight aria-hidden />
+              {teamLink?.athlete_status === "active" ? "Abrir minha área" : "Entrar ou cadastrar"} <ArrowRight aria-hidden />
             </Link>
           </Button>
         </section>

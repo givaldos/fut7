@@ -3,6 +3,7 @@ import {
   createTeamSchema,
   sanitizeTeamSlug,
   slugifyTeamName,
+  updateTeamSchema,
 } from "./onboarding";
 import { describe, expect, it } from "vitest";
 
@@ -55,6 +56,32 @@ describe("onboarding validation", () => {
         teamSlug: "racha-do-bairro",
         email: "admin@example.test",
         role: "owner",
+      }).success,
+    ).toBe(false);
+  });
+
+  it("accepts the editable team profile fields", () => {
+    expect(
+      updateTeamSchema.safeParse({
+        teamId: "10000000-0000-4000-8000-000000000001",
+        currentSlug: "racha-das-7",
+        name: "Racha das 7",
+        sportFormat: "society",
+        timezone: "America/Sao_Paulo",
+        isPublic: true,
+      }).success,
+    ).toBe(true);
+  });
+
+  it("rejects unsupported team settings", () => {
+    expect(
+      updateTeamSchema.safeParse({
+        teamId: "not-an-id",
+        currentSlug: "Slug inválido",
+        name: "Racha",
+        sportFormat: "society",
+        timezone: "UTC",
+        isPublic: true,
       }).success,
     ).toBe(false);
   });

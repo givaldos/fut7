@@ -59,8 +59,16 @@ Gerar de 2 a N times equilibrados a partir dos confirmados, levando em conta gol
 
 - [x] Criar perfil por OTP no WhatsApp e associar ao BID pendente sem senha.
 - [x] Permitir um perfil em vários times com aprovação independente.
+- [x] Oferecer, na página do time, escolha clara entre entrar com WhatsApp e criar o primeiro perfil.
 - [x] Perfil pessoal público/privado com posições globais.
 - [ ] Fluxo assistido para reivindicar um BID administrativo antigo cujo telefone coincida, com trilha explícita para conflitos.
+
+### M1.8.1 Home administrativa
+
+- [x] Ativação gamificada e removida automaticamente após a missão de estreia.
+- [x] Próximo jogo e chamada como foco principal no mobile.
+- [x] Linha do tempo de eventos e movimentações recentes do BID.
+- [x] Configurações e convites fora da home, em área própria do time.
 
 ### M1.9 Súmula e estatísticas básicas
 

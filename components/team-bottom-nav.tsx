@@ -14,7 +14,7 @@ export function TeamBottomNav({
   nextEventId,
 }: {
   teamSlug: string;
-  active: (typeof items)[number]["key"];
+  active: (typeof items)[number]["key"] | "settings";
   nextEventId?: string | null;
 }) {
   const hrefs = {

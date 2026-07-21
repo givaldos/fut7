@@ -34,21 +34,12 @@ const birthDateSchema = z.preprocess(
     .optional(),
 );
 
-const phoneSchema = z.string().transform((value, context) => {
-  const phone = normalizePhone(value);
-  if (!phone) {
-    context.addIssue({ code: "custom", message: "WhatsApp inválido." });
-    return z.NEVER;
-  }
-  return phone;
-});
-
 const registrationSchema = z.object({
   teamSlug: slugSchema,
   fullName: z.string().trim().min(2).max(100),
   preferredName: optionalText(60),
   birthDate: birthDateSchema,
-  phone: phoneSchema,
+  phone: z.string().trim().max(24).optional(),
   acceptsPrivacy: z.literal(true),
   acceptsWhatsapp: z.boolean(),
   positionCodes: z
@@ -87,10 +78,15 @@ export async function prepareAthleteRegistration(
   if (!parsed.success) {
     return {
       ok: false,
-      message:
-        parsed.error.issues.some((issue) => issue.path[0] === "phone")
-          ? "Informe um WhatsApp válido. O +55 é adicionado automaticamente."
-          : "Revise os campos obrigatórios e escolha no máximo 3 posições.",
+      message: "Revise os campos obrigatórios e escolha no máximo 3 posições.",
+    };
+  }
+
+  const phone = normalizePhone(parsed.data.phone ?? "");
+  if (!phone) {
+    return {
+      ok: false,
+      message: "Informe um WhatsApp válido. O +55 é adicionado automaticamente.",
     };
   }
 
@@ -106,7 +102,7 @@ export async function prepareAthleteRegistration(
     };
   }
 
-  return { ok: true, phone: parsed.data.phone };
+  return { ok: true, phone };
 }
 
 export async function completeAthleteRegistration(
@@ -146,5 +142,5 @@ export async function completeAthleteRegistration(
     };
   }
 
-  return { ok: true, phone: parsed.data.phone };
+  return { ok: true, phone: parsed.data.phone ?? "" };
 }

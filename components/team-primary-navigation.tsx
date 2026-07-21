@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarDays, Home, UsersRound } from "lucide-react";
+import { CalendarDays, Home, Settings, UsersRound } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -24,6 +24,12 @@ export function TeamPrimaryNavigation({ teamSlug }: { teamSlug: string }) {
       label: "Agenda",
       icon: CalendarDays,
       selected: pathname.startsWith(`/app/${teamSlug}/events`),
+    },
+    {
+      href: `/app/${teamSlug}/settings`,
+      label: "Ajustes",
+      icon: Settings,
+      selected: pathname.startsWith(`/app/${teamSlug}/settings`),
     },
   ];
 
