@@ -39,7 +39,7 @@ O Turnstile não substitui rate limiting. Antes de abrir produção, configure l
 - aprovação pública usa bloqueio de linha, só aceita estado `pending` e não pode ser repetida;
 - criação de evento materializa a série e popula a chamada do elenco no mesmo commit;
 - alteração administrativa de presença confere evento, atleta ativo e time novamente no banco;
-- lançamento da súmula exige staff, partida iniciada e atleta confirmado; correções ajustam o placar e são auditadas;
+- lançamento da súmula exige staff e atleta confirmado; o minuto é opcional, correções ajustam o placar e são auditadas;
 - estatísticas ignoram rascunhos e são derivadas somente de eventos concluídos com súmula encerrada;
 - `INSERT` direto em `athletes`, `athlete_private`, `venues`, `events` e `event_attendance` foi removido de `authenticated` para impedir agregados parciais;
 - mudanças de status de atleta, evento e presença continuam registradas em `audit_logs` sem copiar PII.

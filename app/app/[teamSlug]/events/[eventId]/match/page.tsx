@@ -217,12 +217,7 @@ export default async function MatchReportPage({
                 </p>
               </div>
             </div>
-            {!eventStarted && !finalized ? (
-              <div className="rounded-2xl bg-amber-50 p-5 text-sm leading-6 text-amber-900">
-                Os lances poderão ser registrados depois do horário de início da
-                partida.
-              </div>
-            ) : athletes?.length ? (
+            {athletes?.length ? (
               <MatchIncidentForm
                 key={(incidents ?? []).length}
                 teamSlug={team.slug}
@@ -244,6 +239,12 @@ export default async function MatchReportPage({
                 </p>
               </div>
             )}
+            {!eventStarted && !finalized && athletes?.length ? (
+              <p className="mt-4 rounded-2xl bg-sky-50 p-4 text-xs leading-5 text-sky-800">
+                A súmula já está aberta. Você pode preparar ou registrar lances
+                sem esperar o horário marcado.
+              </p>
+            ) : null}
           </section>
 
           <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">

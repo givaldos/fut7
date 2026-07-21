@@ -79,7 +79,7 @@ O papel `authenticated` não possui `INSERT` direto em `teams`.
 
 ## Escritas operacionais
 
-As Server Actions validam formato e tamanho, mas a autorização e a atomicidade são impostas novamente no PostgreSQL. RPCs estreitas criam atleta + PII + preferências + chamadas futuras e evento/série + local + chamadas do elenco em uma única transação. A súmula também usa RPCs estreitas: somente staff registra ou corrige lances, o banco exige atleta confirmado e partida iniciada, e cada alteração gera auditoria. O papel autenticado não possui `INSERT` direto nas tabelas centrais desses agregados.
+As Server Actions validam formato e tamanho, mas a autorização e a atomicidade são impostas novamente no PostgreSQL. RPCs estreitas criam atleta + PII + preferências + chamadas futuras e evento/série + local + chamadas do elenco em uma única transação. A súmula também usa RPCs estreitas: somente staff registra ou corrige lances, o banco exige atleta confirmado e cada alteração gera auditoria. A súmula pode ser preparada antes do horário marcado; apenas seu encerramento exige que a partida tenha começado. O papel autenticado não possui `INSERT` direto nas tabelas centrais desses agregados.
 
 O atleta aprovado lê a súmula pelo RLS do próprio time, sem permissão de escrita. O perfil privado obtém seu agregado autenticado; o perfil público expõe somente contagens derivadas de partidas encerradas quando `is_public = true`.
 

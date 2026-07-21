@@ -302,7 +302,7 @@ export async function addMatchIncident(
       outcome: "error",
       message:
         error.code === "55000"
-          ? "A partida precisa ter começado e o atleta deve estar confirmado."
+          ? "Somente atletas confirmados podem receber lances nesta partida."
           : error.code === "42501"
             ? "Você não tem permissão para registrar lances nesta partida."
             : "Não foi possível registrar o lance.",

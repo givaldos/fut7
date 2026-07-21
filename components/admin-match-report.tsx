@@ -336,7 +336,7 @@ export function MatchIncidentForm({
 
       <div className="grid gap-4 sm:grid-cols-[8rem_1fr]">
         <div className="space-y-2">
-          <Label htmlFor="incident-minute">Minuto</Label>
+          <Label htmlFor="incident-minute">Minuto (opcional)</Label>
           <Input
             id="incident-minute"
             name="minute"
@@ -347,8 +347,11 @@ export function MatchIncidentForm({
             max={300}
             inputMode="numeric"
             className="h-12 bg-white"
-            placeholder="Ex.: 18"
+            placeholder="Se souber"
           />
+          <p className="text-[11px] leading-4 text-slate-500">
+            Pode deixar em branco no racha.
+          </p>
         </div>
         <div className="space-y-2">
           <Label htmlFor="incident-notes">Detalhe (opcional)</Label>

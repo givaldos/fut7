@@ -253,7 +253,7 @@ select throws_ok(
   null,
   'an unconfirmed athlete cannot receive a match statistic'
 );
-select throws_ok(
+select lives_ok(
   $$
     select public.add_match_incident_as_staff(
       '84000000-0000-4000-8000-000000000002',
@@ -263,9 +263,7 @@ select throws_ok(
       1
     )
   $$,
-  '55000',
-  null,
-  'a future match cannot receive incidents through the guarded workflow'
+  'staff can prepare a future match report for a confirmed athlete'
 );
 
 reset role;
@@ -466,7 +464,7 @@ select is(
     where audit.team_id = '82000000-0000-4000-8000-000000000001'
       and audit.action = 'match_incidents.insert'
   ),
-  3::bigint,
+  4::bigint,
   'every created match incident is audited'
 );
 select is(
